@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>时光记忆 - 访问验证</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --primary-color: #0d1b2a;
+            --secondary-color: #1b263b;
+            --accent-color: #415a77;
+            --highlight-color: #778da9;
+            --text-light: #e0e1dd;
+            --text-dim: rgba(224, 225, 221, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border-radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --success-color: #4ecdc4;
+            --error-color: #ff6b6b;
+            --warning-color: #ffd166;
+            --wechat-color: #07c160;
+            --douyin-color: #fe2c55;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 背景动画 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(119, 141, 169, 0.05);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .circle-1 {
+            width: 150px;
+            height: 150px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 100px;
+            height: 100px;
+            top: 70%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            bottom: 10%;
+            left: 5%;
+            animation-delay: 7s;
+        }
+
+        .circle-4 {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            right: 20%;
+            animation-delay: 12s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* 主容器 */
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* Logo区域 */
+        .auth-logo {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            color: var(--text-light);
+            box-shadow: var(--shadow);
+            margin-bottom: 10px;
+            overflow: hidden;
+            border: 3px solid rgba(119, 141, 169, 0.3);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #e0e1dd, #778da9, #e0e1dd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .logo-subtitle {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        /* 卡片 */
+        .auth-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            border-radius: var(--border-radius);
+            padding: 35px 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .auth-description {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* 表单 */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            background: rgba(13, 27, 42, 0.6);
+            border: 1px solid rgba(119, 141, 169, 0.3);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 2px rgba(119, 141, 169, 0.2);
+        }
+
+        .form-input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-input::placeholder {
+            color: rgba(224, 225, 221, 0.5);
+        }
+
+        /* 提示信息 */
+        .hint-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .hint-text i {
+            color: var(--highlight-color);
+        }
+
+        /* 按钮 */
+        .auth-button {
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 错误消息 */
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            height: 0;
+            transition: all 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+            height: auto;
+            margin-top: 15px;
+        }
+
+        /* 锁定消息 */
+        .lock-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .lock-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .lock-icon {
+            font-size: 2.5rem;
+            color: var(--error-color);
+            margin-bottom: 15px;
+        }
+
+        .lock-title {
+            color: var(--error-color);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .lock-text {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .countdown-value {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 107, 107, 0.2);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--error-color);
+            margin-bottom: 5px;
+        }
+
+        .countdown-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .countdown-separator {
+            font-size: 1.5rem;
+            color: var(--error-color);
+            font-weight: 700;
+            margin-top: -10px;
+        }
+
+        /* 尝试次数指示器 */
+        .attempts-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .attempt-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(119, 141, 169, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .attempt-dot.used {
+            background: var(--error-color);
+        }
+
+        .attempt-dot.active {
+            background: var(--highlight-color);
+            transform: scale(1.2);
+        }
+
+        /* 页脚 */
+        .auth-footer {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* 联系信息 */
+        .contact-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(119, 141, 169, 0.2);
+        }
+
+        .contact-title {
+            font-size: 1rem;
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .contact-platforms {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+        }
+
+        .contact-platform {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-platform:hover {
+            transform: translateY(-5px);
+        }
+
+        .platform-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .wechat-icon {
+            background: linear-gradient(135deg, var(--wechat-color), #1aad19);
+        }
+
+        .douyin-icon {
+            background: linear-gradient(135deg, var(--douyin-color), #ff0050);
+        }
+
+        .platform-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .wechat-name {
+            color: var(--wechat-color);
+        }
+
+        .douyin-name {
+            color: var(--douyin-color);
+        }
+
+        .platform-id {
+            font-size: 0.8rem;
+            background: rgba(119, 141, 169, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            margin-top: 5px;
+        }
+
+        .copy-btn {
+            background: rgba(119, 141, 169, 0.15);
+            border: 1px solid rgba(119, 141, 169, 0.3);
+            color: var(--highlight-color);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(119, 141, 169, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* 成功状态 */
+        .success-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .success-message.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-content {
+            text-align: center;
+            padding: 30px;
+            max-width: 500px;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--success-color), #88d3ce);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+        }
+
+        .success-text {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--success-color), #e0e1dd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .redirect-text {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 15px;
+            }
+            
+            .auth-card {
+                padding: 25px 20px;
+            }
+            
+            .logo-text {
+                font-size: 1.8rem;
+            }
+            
+            .auth-title {
+                font-size: 1.5rem;
+            }
+            
+            .countdown {
+                gap: 10px;
+            }
+            
+            .countdown-value {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .countdown-separator {
+                font-size: 1.2rem;
+            }
+            
+            .contact-platforms {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="background-animation">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+        <div class="floating-circle circle-4"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="auth-container">
+        <!-- Logo -->
+        <div class="auth-logo">
+            <div class="logo-icon">
+                <!-- 这里替换为您的自定义图片 -->
+                <img src="1.png" alt="时光记忆图标" id="customLogo">
+            </div>
+            <div>
+                <h1 class="logo-text">时光记忆</h1>
+                <p class="logo-subtitle">私密回忆，专属访问</p>
+            </div>
+        </div>
+
+        <!-- 卡片 -->
+        <div class="auth-card">
+            <h2 class="auth-title">访问验证</h2>
+            <p class="auth-description">此页面为私密时光记忆，请输入访问密码以继续浏览。</p>
+            
+            <form class="auth-form" id="passwordForm">
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="passwordInput" 
+                        placeholder="请输入访问密码" 
+                        autocomplete="off"
+                        required
+                    >
+                </div>
+                
+                <!-- 错误消息 -->
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText">密码错误，请重试</span>
+                </div>
+                
+                <!-- 尝试次数指示器 -->
+                <div class="attempts-indicator" id="attemptsIndicator">
+                    <!-- 尝试次数点将通过JS动态生成 -->
+                </div>
+                
+                <button type="submit" class="auth-button" id="submitButton">
+                    <i class="fas fa-key"></i>
+                    <span>进入时光记忆</span>
+                </button>
+            </form>
+            
+            <!-- 锁定消息 -->
+            <div class="lock-message" id="lockMessage">
+                <div class="lock-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="lock-title">访问已锁定</h3>
+                <p class="lock-text">尝试次数过多，出于安全考虑，系统已暂时锁定。</p>
+                <p class="lock-text">请在 <span id="lockTime">00:30</span> 后重试</p>
+                
+                <div class="countdown" id="countdown">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="minutes">00</div>
+                        <div class="countdown-label">分钟</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="seconds">00</div>
+                        <div class="countdown-label">秒</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hint-text">
+                <i class="fas fa-info-circle"></i>
+                <span>提示：密码请联系管理员清浅获取</span>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="auth-footer">
+            <p>© 2023 时光记忆轴 | 私密访问系统</p>
+            <p>您有 <span style="color: var(--highlight-color); font-weight: 700;">5次</span> 尝试机会，请谨慎输入</p>
+            
+            <!-- 联系信息 -->
+            <div class="contact-info">
+                <h3 class="contact-title">
+                    <i class="fas fa-user-shield"></i>
+                    <span>密码获取方式</span>
+                </h3>
+                
+                <div class="contact-platforms">
+                    <!-- 微信 -->
+                    <div class="contact-platform">
+                        <div class="platform-icon wechat-icon">
+                            <i class="fab fa-weixin"></i>
+                        </div>
+                        <div class="platform-name wechat-name">微信</div>
+                        <div class="platform-id" id="wechatId">QQ1208912705</div>
+                        <button class="copy-btn" onclick="copyToClipboard('wechatId')">复制</button>
+                    </div>
+                    
+                    <!-- 抖音 -->
+                    <div class="contact-platform">
+                        <div class="platform-icon douyin-icon">
+                            <i class="fab fa-tiktok"></i>
+                        </div>
+                        <div class="platform-name douyin-name">抖音</div>
+                        <div class="platform-id" id="douyinId">@TimeMemory_Official</div>
+                        <button class="copy-btn" onclick="copyToClipboard('douyinId')">复制</button>
+                    </div>
+                </div>
+                
+                <p style="font-size: 0.8rem; margin-top: 15px; color: var(--text-dim);">
+                    添加好友后，请发送"获取密码"消息
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功消息 -->
+    <div class="success-message" id="successMessage">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-text">验证成功</h2>
+            <p class="redirect-text">正在为您打开时光记忆...</p>
+            <div class="hint-text">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>请稍候，页面即将跳转</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const CORRECT_PASSWORD = "ziqing520"; // 示例密码，可以根据需要修改
+        const REDIRECT_URL = "2.html"; // 主页面文件名
+        const MAX_ATTEMPTS = 5; // 最大尝试次数（已改为5次）
+        const LOCK_TIME = 30; // 锁定时间（秒）
+        
+        // DOM元素
+        const passwordForm = document.getElementById('passwordForm');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitButton = document.getElementById('submitButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const lockMessage = document.getElementById('lockMessage');
+        const lockTimeText = document.getElementById('lockTime');
+        const successMessage = document.getElementById('successMessage');
+        const attemptsIndicator = document.getElementById('attemptsIndicator');
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const customLogo = document.getElementById('customLogo');
+        
+        // 状态变量
+        let attempts = 0;
+        let isLocked = false;
+        let countdownInterval = null;
+        let remainingLockTime = LOCK_TIME;
+        
+        // 图片加载失败时使用备用图标
+        function handleImageError() {
+            customLogo.style.display = 'none';
+            const logoIcon = document.querySelector('.logo-icon');
+            logoIcon.innerHTML = '<i class="fas fa-hourglass-half"></i>';
+        }
+        
+        // 复制到剪贴板功能
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // 显示复制成功提示
+                const originalText = element.textContent;
+                element.textContent = '已复制！';
+                element.style.color = 'var(--success-color)';
+                
+                setTimeout(() => {
+                    element.textContent = originalText;
+                    element.style.color = '';
+                }, 1500);
+            }).catch(err => {
+                console.error('复制失败: ', err);
+                // 备用方法
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalText = element.textContent;
+                element.textContent = '已复制！';
+                element.style.color = 'var(--success-color)';
+                
+                setTimeout(() => {
+                    element.textContent = originalText;
+                    element.style.color = '';
+                }, 1500);
+            });
+        }
+        
+        // 初始化尝试次数指示器
+        function initAttemptsIndicator() {
+            attemptsIndicator.innerHTML = '';
+            for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'attempt-dot';
+                if (i < attempts) {
+                    dot.classList.add('used');
+                } else if (i === attempts) {
+                    dot.classList.add('active');
+                }
+                attemptsIndicator.appendChild(dot);
+            }
+        }
+        
+        // 更新尝试次数指示器
+        function updateAttemptsIndicator() {
+            const dots = attemptsIndicator.querySelectorAll('.attempt-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('used', 'active');
+                if (index < attempts) {
+                    dot.classList.add('used');
+                } else if (index === attempts) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+        
+        // 格式化时间（MM:SS）
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 开始倒计时
+        function startCountdown() {
+            clearInterval(countdownInterval);
+            remainingLockTime = LOCK_TIME;
+            
+            countdownInterval = setInterval(() => {
+                remainingLockTime--;
+                
+                const mins = Math.floor(remainingLockTime / 60);
+                const secs = remainingLockTime % 60;
+                
+                minutesElement.textContent = mins.toString().padStart(2, '0');
+                secondsElement.textContent = secs.toString().padStart(2, '0');
+                lockTimeText.textContent = formatTime(remainingLockTime);
+                
+                if (remainingLockTime <= 0) {
+                    unlockForm();
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+        
+        // 锁定表单
+        function lockForm() {
+            isLocked = true;
+            passwordInput.disabled = true;
+            submitButton.disabled = true;
+            lockMessage.classList.add('show');
+            passwordForm.classList.add('shake');
+            
+            startCountdown();
+            
+            // 移除抖动效果
+            setTimeout(() => {
+                passwordForm.classList.remove('shake');
+            }, 500);
+        }
+        
+        // 解锁表单
+        function unlockForm() {
+            isLocked = false;
+            attempts = 0;
+            remainingLockTime = LOCK_TIME;
+            passwordInput.disabled = false;
+            submitButton.disabled = false;
+            lockMessage.classList.remove('show');
+            hideError();
+            updateAttemptsIndicator();
+            
+            // 重新聚焦到输入框
+            passwordInput.focus();
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+        }
+        
+        // 隐藏错误信息
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+        
+        // 表单提交
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (isLocked) return;
+            
+            const password = passwordInput.value.trim();
+            
+            // 清空之前的错误信息
+            hideError();
+            
+            // 验证密码
+            if (password === CORRECT_PASSWORD) {
+                // 密码正确
+                showSuccess();
+            } else {
+                // 密码错误
+                attempts++;
+                updateAttemptsIndicator();
+                
+                if (attempts >= MAX_ATTEMPTS) {
+                    showError("尝试次数过多，系统已锁定！");
+                    lockForm();
+                } else {
+                    const remainingAttempts = MAX_ATTEMPTS - attempts;
+                    showError(`密码错误，您还有 ${remainingAttempts} 次尝试机会`);
+                    
+                    // 清空输入框并重新聚焦
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                    
+                    // 添加抖动效果
+                    passwordForm.classList.add('shake');
+                    setTimeout(() => {
+                        passwordForm.classList.remove('shake');
+                    }, 500);
+                }
+            }
+        });
+        
+        // 显示成功信息并跳转
+        function showSuccess() {
+            successMessage.classList.add('active');
+            
+            // 3秒后跳转到主页面
+            setTimeout(() => {
+                window.location.href = REDIRECT_URL;
+            }, 3000);
+        }
+        
+        // 页面初始化
+        function init() {
+            initAttemptsIndicator();
+            
+            // 页面加载时聚焦到密码输入框
+            passwordInput.focus();
+            
+            // 检查是否有锁定状态（从本地存储）
+            const savedState = localStorage.getItem('authState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                const currentTime = Date.now();
+                
+                if (state.lockedUntil && currentTime < state.lockedUntil) {
+                    attempts = state.attempts || 0;
+                    remainingLockTime = Math.ceil((state.lockedUntil - currentTime) / 1000);
+                    lockForm();
+                } else if (state.attempts) {
+                    attempts = state.attempts;
+                    updateAttemptsIndicator();
+                }
+            }
+            
+            // 设置图片加载失败的回调
+            customLogo.addEventListener('error', handleImageError);
+        }
+        
+        // 保存状态到本地存储
+        function saveState() {
+            const state = {
+                attempts: attempts,
+                isLocked: isLocked,
+                lockedUntil: isLocked ? Date.now() + remainingLockTime * 1000 : null
+            };
+            localStorage.setItem('authState', JSON.stringify(state));
+        }
+        
+        // 清理本地存储（成功验证后）
+        function clearState() {
+            localStorage.removeItem('authState');
+        }
+        
+        // 添加抖动动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 按Enter键提交表单
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !isLocked) {
+                passwordForm.dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        // 输入时隐藏错误信息
+        passwordInput.addEventListener('input', hideError);
+        
+        // 定期保存状态
+        setInterval(saveState, 1000);
+        
+        // 页面卸载时保存状态
+        window.addEventListener('beforeunload', saveState);
+        
+        // 成功验证后清理状态
+        window.addEventListener('pagehide', function() {
+            if (!isLocked && attempts < MAX_ATTEMPTS) {
+                clearState();
+            }
+        });
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
