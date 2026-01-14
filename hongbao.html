@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>专属口令红包 - 晴宝生日快乐</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --primary-color: #0d1b2a;
+            --secondary-color: #1b263b;
+            --accent-color: #415a77;
+            --highlight-color: #778da9;
+            --text-light: #e0e1dd;
+            --text-dim: rgba(224, 225, 221, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border-radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --success-color: #4ecdc4;
+            --error-color: #ff6b6b;
+            --warning-color: #ffd166;
+            --redpacket-color: #ff6b6b;
+            --alipay-color: #00a3ff;
+            --wechat-color: #07c160;
+            --gold-color: #ffd700;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 背景动画 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 107, 107, 0.05);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .circle-1 {
+            width: 150px;
+            height: 150px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        .circle-2 {
+            width: 100px;
+            height: 100px;
+            top: 70%;
+            right: 15%;
+            animation-delay: 3s;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            bottom: 10%;
+            left: 5%;
+            animation-delay: 7s;
+            background: rgba(78, 205, 196, 0.05);
+        }
+
+        .circle-4 {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            right: 20%;
+            animation-delay: 12s;
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* 红包飘落效果 */
+        .falling-redpacket {
+            position: absolute;
+            top: -50px;
+            color: var(--redpacket-color);
+            font-size: 24px;
+            opacity: 0;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0.5;
+            }
+        }
+
+        /* 主容器 */
+        .redpacket-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* Logo区域 */
+        .redpacket-logo {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--redpacket-color), #ff8e8e);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: var(--gold-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 10px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .logo-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        /* 祝福语卡片 */
+        .blessing-card {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 215, 0, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: var(--border-radius);
+            padding: 35px 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blessing-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .blessing-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .blessing-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--gold-color);
+        }
+
+        .blessing-text {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .sender-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .sender-name {
+            color: var(--highlight-color);
+            font-weight: 600;
+        }
+
+        /* 红包卡片 */
+        .redpacket-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            border-radius: var(--border-radius);
+            padding: 35px 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .redpacket-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .redpacket-description {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* 口令显示区域 */
+        .password-display {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .password-box {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(255, 215, 0, 0.1));
+            border: 2px dashed rgba(255, 107, 107, 0.3);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .password-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: var(--gold-color);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .password-hint {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+        }
+
+        /* 按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--redpacket-color), #ff8e8e);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .alipay-button {
+            background: linear-gradient(135deg, var(--alipay-color), #0088ff);
+        }
+
+        .alipay-button:hover {
+            box-shadow: 0 10px 20px rgba(0, 163, 255, 0.3);
+        }
+
+        /* 提示信息 */
+        .hint-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .hint-text i {
+            color: var(--highlight-color);
+        }
+
+        /* 步骤指导 */
+        .steps-guide {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(119, 141, 169, 0.2);
+        }
+
+        .steps-title {
+            font-size: 1rem;
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(119, 141, 169, 0.05);
+            border-radius: 10px;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            color: var(--text-light);
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .highlight-text {
+            color: var(--gold-color);
+            font-weight: 600;
+        }
+
+        /* 页脚 */
+        .redpacket-footer {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        /* 成功消息 */
+        .success-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .success-message.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-content {
+            text-align: center;
+            padding: 30px;
+            max-width: 500px;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--success-color), #88d3ce);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+        }
+
+        .success-text {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--success-color), #e0e1dd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .redpacket-container {
+                padding: 15px;
+            }
+            
+            .blessing-card, .redpacket-card {
+                padding: 25px 20px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+            
+            .blessing-title, .redpacket-title {
+                font-size: 1.5rem;
+            }
+            
+            .password-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="background-animation">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+        <div class="floating-circle circle-4"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="redpacket-container">
+        <!-- Logo -->
+        <div class="redpacket-logo">
+            <div class="logo-icon">
+                <i class="fas fa-gift"></i>
+            </div>
+            <div>
+                <h1 class="logo-text">专属红包</h1>
+                <p class="logo-subtitle">晴宝生日快乐</p>
+            </div>
+        </div>
+
+        <!-- 祝福语卡片 -->
+        <div class="blessing-card">
+            <div class="blessing-content">
+                <h2 class="blessing-title">🎂 生日快乐，晴宝！</h2>
+                <p class="blessing-text">
+                    在这特别的日子里，清浅为你准备了一份小小的心意。<br>
+                    愿你的每一天都充满阳光与欢笑，<br>
+                    愿你的每一个梦想都能如期绽放。
+                </p>
+                <div class="sender-info">
+                    <i class="fas fa-heart" style="color: var(--redpacket-color);"></i>
+                    <span>来自：</span>
+                    <span class="sender-name">清浅</span>
+                    <span>的祝福</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 红包卡片 -->
+        <div class="redpacket-card">
+            <h2 class="redpacket-title">支付宝口令红包</h2>
+            <p class="redpacket-description">
+                已为你生成专属领取口令，请复制下方口令<br>
+                打开支付宝领取你的生日红包
+            </p>
+            
+            <!-- 口令显示区域 -->
+            <div class="password-display">
+                <div class="password-box">
+                    <div class="password-hint">专属领取口令</div>
+                    <div class="password-text" id="passwordText">QINGBAO2024HAPPY</div>
+                    <div class="password-hint">有效期至：2024年12月31日</div>
+                </div>
+                
+                <button class="action-button" onclick="copyPassword()">
+                    <i class="fas fa-copy"></i>
+                    <span>复制领取口令</span>
+                </button>
+            </div>
+            
+            <div class="hint-text">
+                <i class="fas fa-info-circle"></i>
+                <span>点击上方按钮复制口令，然后打开支付宝领取</span>
+            </div>
+            
+            <!-- 步骤指导 -->
+            <div class="steps-guide">
+                <h3 class="steps-title">
+                    <i class="fas fa-list-ol"></i>
+                    <span>领取步骤</span>
+                </h3>
+                
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">
+                            点击上方 <span class="highlight-text">"复制领取口令"</span> 按钮
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">
+                            打开 <span class="highlight-text">支付宝APP</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">
+                            在首页搜索栏粘贴口令，点击 <span class="highlight-text">"搜索"</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-text">
+                            按照提示完成领取，祝你领取成功！
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 快速跳转按钮 -->
+            <button class="action-button alipay-button" onclick="openAlipay()">
+                <i class="fab fa-alipay"></i>
+                <span>打开支付宝APP</span>
+            </button>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="redpacket-footer">
+            <p>© 2024 清浅的祝福 | 专属生日红包</p>
+            <p>本红包由清浅用心准备，祝你生日快乐！</p>
+        </div>
+    </div>
+
+    <!-- 成功消息 -->
+    <div class="success-message" id="successMessage">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-text">口令已复制</h2>
+            <p class="hint-text">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>请打开支付宝APP粘贴领取</span>
+            </p>
+            <p style="color: var(--text-dim); margin-top: 20px; font-size: 0.9rem;">
+                如果支付宝没有自动打开，请在应用列表中找到支付宝
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const passwordText = document.getElementById('passwordText');
+        const successMessage = document.getElementById('successMessage');
+        
+        // 生成随机红包飘落效果
+        function createFallingRedpackets() {
+            const container = document.querySelector('.background-animation');
+            const emojis = ['🧧', '🎁', '💰', '💝', '🎊', '🎉'];
+            
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const redpacket = document.createElement('div');
+                    redpacket.className = 'falling-redpacket';
+                    redpacket.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                    
+                    // 随机位置
+                    redpacket.style.left = Math.random() * 100 + '%';
+                    redpacket.style.animationDuration = (Math.random() * 5 + 3) + 's';
+                    redpacket.style.animationDelay = Math.random() * 2 + 's';
+                    redpacket.style.fontSize = (Math.random() * 10 + 20) + 'px';
+                    
+                    container.appendChild(redpacket);
+                    
+                    // 动画结束后移除元素
+                    setTimeout(() => {
+                        redpacket.remove();
+                    }, 10000);
+                }, i * 200);
+            }
+        }
+        
+        // 复制口令到剪贴板
+        function copyPassword() {
+            const password = passwordText.textContent;
+            
+            navigator.clipboard.writeText(password).then(() => {
+                showSuccessMessage();
+                
+                // 播放成功音效（如果有）
+                playSuccessSound();
+                
+                // 添加红包飘落效果
+                createFallingRedpackets();
+                
+            }).catch(err => {
+                console.error('复制失败: ', err);
+                // 备用复制方法
+                const textArea = document.createElement('textarea');
+                textArea.value = password;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                showSuccessMessage();
+                createFallingRedpackets();
+            });
+        }
+        
+        // 显示成功消息
+        function showSuccessMessage() {
+            successMessage.classList.add('active');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                successMessage.classList.remove('active');
+            }, 3000);
+        }
+        
+        // 打开支付宝（尝试）
+        function openAlipay() {
+            // 支付宝URL Scheme
+            const alipayUrl = 'alipays://';
+            const alipayQRUrl = 'https://qr.alipay.com/fkx16888sg0fsnkrzojbbf5';
+            
+            // 尝试打开支付宝APP
+            window.location.href = alipayUrl;
+            
+            // 如果打不开，3秒后显示二维码备用方案
+            setTimeout(() => {
+                if (document.hasFocus()) {
+                    // 还在当前页面，说明没打开支付宝
+                    showAlipayQRCode();
+                }
+            }, 3000);
+        }
+        
+        // 显示支付宝二维码（备用方案）
+        function showAlipayQRCode() {
+            alert('无法自动打开支付宝，请手动打开支付宝APP，然后扫描屏幕上的二维码');
+            // 这里可以添加显示二维码的逻辑
+        }
+        
+        // 模拟成功音效
+        function playSuccessSound() {
+            // 可以在这里添加音频播放
+            try {
+                // 创建简单的音效
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('音频播放失败:', e);
+            }
+        }
+        
+        // 页面初始化
+        function init() {
+            // 页面加载时开始飘落红包
+            createFallingRedpackets();
+            
+            // 每10秒重新生成飘落效果
+            setInterval(createFallingRedpackets, 10000);
+            
+            // 添加点击动画效果
+            const buttons = document.querySelectorAll('.action-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+        
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+C 或 Cmd+C 复制口令
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                copyPassword();
+                e.preventDefault();
+            }
+            
+            // 空格键打开支付宝
+            if (e.key === ' ') {
+                openAlipay();
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
