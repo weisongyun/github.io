@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>支付宝生日红包 - 晴宝生日快乐</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --alipay-blue: #1677ff;
+            --alipay-light-blue: #4096ff;
+            --alipay-dark-blue: #0958d9;
+            --alipay-gradient: linear-gradient(135deg, #1677ff, #4096ff);
+            --alipay-gold: #ffd700;
+            --alipay-red: #ff4d4f;
+            --alipay-green: #52c41a;
+            --text-light: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --success-color: #52c41a;
+            --wechat-green: #07c160;
+        }
+
+        body {
+            background: linear-gradient(180deg, #061325 0%, #0a1a35 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 支付宝主题背景动画 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0;
+            animation: floatAlipay linear forwards;
+            filter: drop-shadow(0 5px 15px rgba(22, 119, 255, 0.3));
+        }
+
+        @keyframes floatAlipay {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 波浪背景 */
+        .wave-bg {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(180deg, transparent 0%, rgba(22, 119, 255, 0.1) 100%);
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        /* 主容器 */
+        .alipay-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* 顶部祝福区域 */
+        .blessing-section {
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .alipay-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--alipay-gradient);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.8rem;
+            color: white;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(22, 119, 255, 0.3);
+            transform: rotate(-5deg);
+        }
+
+        .blessing-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(22, 119, 255, 0.5);
+            background: linear-gradient(45deg, #ffd700, #ffffff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .blessing-subtext {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+        }
+
+        .sender-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .sender-name {
+            color: var(--alipay-gold);
+            font-weight: 600;
+        }
+
+        /* 支付宝红包样式 */
+        .alipay-redpacket {
+            background: linear-gradient(145deg, var(--alipay-blue), var(--alipay-dark-blue));
+            border-radius: 25px;
+            box-shadow: 
+                0 25px 50px rgba(22, 119, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            margin-bottom: 30px;
+            position: relative;
+            transition: transform 0.3s ease;
+            animation: pulseAlipay 2s infinite alternate;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes pulseAlipay {
+            0% {
+                transform: translateY(0);
+                box-shadow: 0 20px 40px rgba(22, 119, 255, 0.4);
+            }
+            100% {
+                transform: translateY(-5px);
+                box-shadow: 0 30px 60px rgba(22, 119, 255, 0.6);
+            }
+        }
+
+        .redpacket-header {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 35px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .redpacket-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                transparent 100%);
+        }
+
+        .redpacket-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .alipay-header-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            color: var(--alipay-blue);
+            transform: rotate(-3deg);
+        }
+
+        .header-text {
+            text-align: left;
+        }
+
+        .redpacket-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .redpacket-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .redpacket-from {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 5px;
+        }
+
+        .redpacket-message {
+            font-size: 1.3rem;
+            color: var(--alipay-gold);
+            font-weight: 700;
+            margin-top: 20px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        /* 开红包按钮区域 */
+        .open-redpacket-area {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            padding: 35px 25px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .open-redpacket-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 15px,
+                var(--alipay-blue) 15px,
+                var(--alipay-blue) 30px
+            );
+        }
+
+        .open-button {
+            width: 140px;
+            height: 140px;
+            background: var(--alipay-gradient);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 900;
+            box-shadow: 
+                0 15px 40px rgba(22, 119, 255, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.3);
+            animation: pulseOpen 1.5s infinite alternate;
+            overflow: hidden;
+        }
+
+        @keyframes pulseOpen {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 15px 40px rgba(22, 119, 255, 0.5);
+            }
+            100% {
+                transform: scale(1.08);
+                box-shadow: 0 20px 50px rgba(22, 119, 255, 0.8);
+            }
+        }
+
+        .open-button:hover {
+            transform: scale(1.12);
+            box-shadow: 0 25px 60px rgba(22, 119, 255, 0.9);
+        }
+
+        .open-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 70%
+            );
+            animation: shineButton 3s infinite linear;
+        }
+
+        @keyframes shineButton {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(360deg); }
+        }
+
+        .open-text {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .open-hint {
+            font-size: 1.1rem;
+            color: white;
+            font-weight: 600;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .open-subhint {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* 红包内容区域 - 优化：直接显示，无需滑动 */
+        .redpacket-content {
+            background: white;
+            padding: 0;
+            max-height: 0;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            visibility: hidden;
+        }
+
+        .redpacket-content.opened {
+            padding: 35px 25px;
+            max-height: none; /* 移除最大高度限制 */
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 打开后的样式 - 移除滑动效果 */
+        .opened-redpacket .open-redpacket-area {
+            display: none; /* 直接隐藏开红包区域，而不是滑动 */
+        }
+
+        /* 红包内金额显示 - 移除"元"字 */
+        .amount-display {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+            border-radius: 20px;
+            border: 3px solid var(--alipay-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .amount-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(22, 119, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .amount-label {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .amount-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--alipay-blue);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 已移除::after中的"元"字 */
+        .amount-text {
+            font-size: 1.1rem;
+            color: #666;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 支付宝口令区域 - 更突出显示 */
+        .password-section {
+            background: #f8faff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            border: 2px solid #e6f2ff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .password-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--alipay-gradient);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--alipay-blue);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: var(--alipay-blue);
+            font-size: 1.5rem;
+        }
+
+        .password-box {
+            background: white;
+            border: 3px solid var(--alipay-blue);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(22, 119, 255, 0.1);
+        }
+
+        .password-label {
+            font-size: 1rem;
+            color: #999;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .password-text {
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: var(--alipay-blue);
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 12px;
+            border: 2px solid #cce5ff;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .password-hint {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* 操作按钮 - 更突出 */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-button:hover::before {
+            left: 100%;
+        }
+
+        .copy-button {
+            background: var(--alipay-gradient);
+            color: white;
+        }
+
+        .open-alipay-button {
+            background: linear-gradient(135deg, var(--alipay-green), #52c41a);
+            color: white;
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        /* 领取步骤 */
+        .steps-guide {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8faff;
+            border-radius: 20px;
+            border: 2px solid #e6f2ff;
+        }
+
+        .steps-title {
+            font-size: 1.2rem;
+            color: var(--alipay-blue);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            border-left: 4px solid var(--alipay-blue);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--alipay-gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        .step-text {
+            font-size: 0.95rem;
+            color: #666;
+            flex: 1;
+        }
+
+        .highlight-text {
+            color: var(--alipay-blue);
+            font-weight: 700;
+        }
+
+        .step-icon {
+            color: var(--alipay-blue);
+            font-size: 1.2rem;
+        }
+
+        /* 成功提示 */
+        .success-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 19, 37, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .success-message.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-content {
+            background: white;
+            border-radius: 25px;
+            padding: 40px 30px;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border: 3px solid var(--alipay-blue);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            background: var(--alipay-gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 25px;
+            box-shadow: 0 15px 40px rgba(22, 119, 255, 0.4);
+        }
+
+        .success-text {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--alipay-blue);
+        }
+
+        .success-detail {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        /* 页脚 */
+        .alipay-footer {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-align: center;
+            line-height: 1.6;
+            margin-top: 30px;
+        }
+
+        .alipay-footer p:first-child {
+            color: var(--alipay-gold);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes confettiAlipay {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .alipay-container {
+                padding: 15px;
+            }
+            
+            .blessing-text {
+                font-size: 1.7rem;
+            }
+            
+            .open-button {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .open-text {
+                font-size: 2.3rem;
+            }
+            
+            .password-text {
+                font-size: 1.6rem;
+            }
+            
+            .amount-value {
+                font-size: 2.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .redpacket-header {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .redpacket-title {
+                font-size: 1.5rem;
+            }
+            
+            .password-text {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="background-animation" id="backgroundAnimation"></div>
+    <div class="wave-bg"></div>
+
+    <!-- 主容器 -->
+    <div class="alipay-container">
+        <!-- 祝福区域 -->
+        <div class="blessing-section">
+            <div class="alipay-icon">
+                <i class="fab fa-alipay"></i>
+            </div>
+            <h1 class="blessing-text">晴宝，生日快乐！</h1>
+            <p class="blessing-subtext">一份特别的支付宝红包正在等待你开启</p>
+            <div class="sender-info">
+                <i class="fas fa-gift" style="color: var(--alipay-gold);"></i>
+                <span>来自：</span>
+                <span class="sender-name">清浅</span>
+                <span>的生日祝福</span>
+            </div>
+        </div>
+
+        <!-- 支付宝红包样式 -->
+        <div class="alipay-redpacket" id="redpacket">
+            <!-- 红包顶部 -->
+            <div class="redpacket-header">
+                <div class="redpacket-logo">
+                    <div class="alipay-header-icon">
+                        <i class="fab fa-alipay"></i>
+                    </div>
+                    <div class="header-text">
+                        <div class="redpacket-title">支付宝红包</div>
+                        <div class="redpacket-subtitle">生日专享福利</div>
+                    </div>
+                </div>
+                <div class="redpacket-from">清浅</div>
+                <div class="redpacket-message">晴宝生日快乐 🎂</div>
+            </div>
+
+            <!-- 开红包区域 -->
+            <div class="open-redpacket-area" id="openArea">
+                <button class="open-button" onclick="openRedpacket()">
+                    <div class="open-text">开</div>
+                    <div class="open-hint">点我打开</div>
+                </button>
+                <div class="open-subhint">点击上方按钮开启生日红包</div>
+            </div>
+
+            <!-- 红包内容（默认隐藏，打开后直接显示） -->
+            <div class="redpacket-content" id="redpacketContent">
+                <!-- 金额显示 - 已移除"元"字 -->
+                <div class="amount-display">
+                    <div class="amount-label">恭喜你，晴宝！</div>
+                    <div class="amount-value">生日专享</div>
+                    <div class="amount-text">支付宝口令红包已为你备好</div>
+                </div>
+
+                <!-- 支付宝口令区域 - 直接显示，无需滑动 -->
+                <div class="password-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-key"></i>
+                        <span>支付宝领取口令</span>
+                    </h3>
+                    
+                    <div class="password-box">
+                        <div class="password-label">复制下方口令，打开支付宝APP领取</div>
+                        <div class="password-text" id="passwordText">QINGBAO2024HAPPY</div>
+                        <div class="password-hint">
+                            <i class="far fa-clock"></i>
+                            <span>有效期至：2024年12月31日 23:59</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-button copy-button" onclick="copyPassword()">
+                            <i class="fas fa-copy"></i>
+                            <span>复制口令</span>
+                        </button>
+                        <button class="action-button open-alipay-button" onclick="openAlipay()">
+                            <i class="fab fa-alipay"></i>
+                            <span>打开支付宝</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 领取步骤 -->
+                <div class="steps-guide">
+                    <h3 class="steps-title">
+                        <i class="fas fa-walking"></i>
+                        <span>领取步骤</span>
+                    </h3>
+                    
+                    <div class="steps-list">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-text">点击 <span class="highlight-text">"复制口令"</span> 按钮</div>
+                            <div class="step-icon"><i class="fas fa-mouse-pointer"></i></div>
+                        </div>
+                        
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-text">打开 <span class="highlight-text">支付宝APP</span></div>
+                            <div class="step-icon"><i class="fab fa-alipay"></i></div>
+                        </div>
+                        
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-text">首页搜索框粘贴并搜索口令</div>
+                            <div class="step-icon"><i class="fas fa-search"></i></div>
+                        </div>
+                        
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div class="step-text">按提示完成领取，祝你生日快乐！</div>
+                            <div class="step-icon"><i class="fas fa-birthday-cake"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="alipay-footer">
+            <p>支付宝生日红包 · 清浅的心意</p>
+            <p>心意无价，祝福永恒，祝晴宝生日快乐！</p>
+        </div>
+    </div>
+
+    <!-- 成功消息 -->
+    <div class="success-message" id="successMessage">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-text">口令已复制！</h2>
+            <p class="success-detail">请打开支付宝APP粘贴领取</p>
+            <div class="action-buttons" style="margin-top: 25px;">
+                <button class="action-button open-alipay-button" onclick="openAlipay()" style="width: 100%;">
+                    <i class="fab fa-alipay"></i>
+                    <span>立即打开支付宝</span>
+                </button>
+            </div>
+            <p style="color: #999; font-size: 0.9rem; margin-top: 20px;">
+                <i class="fas fa-lightbulb"></i>
+                如未自动跳转，请在应用列表中找到支付宝
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const redpacket = document.getElementById('redpacket');
+        const openArea = document.getElementById('openArea');
+        const redpacketContent = document.getElementById('redpacketContent');
+        const passwordText = document.getElementById('passwordText');
+        const successMessage = document.getElementById('successMessage');
+        const backgroundAnimation = document.getElementById('backgroundAnimation');
+
+        // 创建支付宝主题的飘落元素
+        function createFallingElements() {
+            const alipayElements = ['💰', '🎁', '💝', '✨', '🔑', '🎉', '🧧', '🎊'];
+            
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const element = document.createElement('div');
+                    element.className = 'floating-element';
+                    element.textContent = alipayElements[Math.floor(Math.random() * alipayElements.length)];
+                    
+                    // 随机位置
+                    element.style.left = Math.random() * 100 + '%';
+                    element.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                    element.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                    element.style.animationDelay = Math.random() * 2 + 's';
+                    element.style.color = Math.random() > 0.5 ? '#1677ff' : '#ffd700';
+                    
+                    backgroundAnimation.appendChild(element);
+                    
+                    // 动画结束后移除
+                    setTimeout(() => {
+                        element.remove();
+                    }, 10000);
+                }, i * 400);
+            }
+        }
+
+        // 创建支付宝主题的庆祝效果
+        function createAlipayConfetti() {
+            const confettiColors = ['#1677ff', '#4096ff', '#ffd700', '#52c41a', '#ffffff', '#ff4d4f'];
+            const confettiContainer = document.createElement('div');
+            confettiContainer.style.position = 'fixed';
+            confettiContainer.style.top = '0';
+            confettiContainer.style.left = '0';
+            confettiContainer.style.width = '100%';
+            confettiContainer.style.height = '100%';
+            confettiContainer.style.pointerEvents = 'none';
+            confettiContainer.style.zIndex = '999';
+            document.body.appendChild(confettiContainer);
+
+            // 创建80个彩屑
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'absolute';
+                    confetti.style.top = '40%';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.width = Math.random() * 12 + 6 + 'px';
+                    confetti.style.height = Math.random() * 12 + 6 + 'px';
+                    confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    confetti.style.opacity = '0.9';
+                    confetti.style.transform = `rotate(${Math.random() * 45}deg)`;
+                    
+                    confettiContainer.appendChild(confetti);
+
+                    // 彩屑动画
+                    const animation = confetti.animate([
+                        {
+                            transform: `translate(0, 0) rotate(0deg)`,
+                            opacity: 1
+                        },
+                        {
+                            transform: `translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 720}deg)`,
+                            opacity: 0
+                        }
+                    ], {
+                        duration: Math.random() * 2000 + 1500,
+                        easing: 'cubic-bezier(0.1, 0.8, 0.9, 0.2)'
+                    });
+
+                    // 动画结束后移除
+                    animation.onfinish = () => {
+                        confetti.remove();
+                    };
+                }, i * 40);
+            }
+
+            // 3.5秒后移除彩屑容器
+            setTimeout(() => {
+                confettiContainer.remove();
+            }, 3500);
+        }
+
+        // 播放支付宝主题开红包音效
+        function playAlipayOpenSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 支付宝风格的音效
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        // 支付宝特色的音阶
+                        const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                        oscillator.frequency.value = frequencies[i];
+                        oscillator.type = i % 2 === 0 ? 'sine' : 'triangle';
+                        
+                        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.4);
+                    }, i * 120);
+                }
+            } catch (e) {
+                console.log('音效播放失败:', e);
+            }
+        }
+
+        // 打开红包 - 优化：直接显示内容，无需滑动
+        function openRedpacket() {
+            // 播放支付宝主题音效
+            playAlipayOpenSound();
+            
+            // 创建支付宝主题庆祝效果
+            createAlipayConfetti();
+            
+            // 添加飘落元素
+            createFallingElements();
+            
+            // 直接显示红包内容，不需要滑动效果
+            redpacketContent.classList.add('opened');
+            
+            // 隐藏开红包按钮区域
+            openArea.style.display = 'none';
+            
+            // 添加打开状态类
+            redpacket.classList.add('opened-redpacket');
+            
+            // 震动效果（如果设备支持）
+            if (navigator.vibrate) {
+                navigator.vibrate([80, 40, 80, 40, 80]);
+            }
+            
+            // 停止红包的脉冲动画
+            redpacket.style.animation = 'none';
+            
+            // 自动滚动到口令区域
+            setTimeout(() => {
+                redpacketContent.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 500);
+        }
+
+        // 复制口令到剪贴板
+        function copyPassword() {
+            const password = passwordText.textContent;
+            
+            navigator.clipboard.writeText(password).then(() => {
+                showSuccessMessage();
+                createFallingElements();
+                
+                // 播放成功音效
+                playAlipaySuccessSound();
+                
+            }).catch(err => {
+                console.error('复制失败: ', err);
+                // 备用复制方法
+                const textArea = document.createElement('textarea');
+                textArea.value = password;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                showSuccessMessage();
+                createFallingElements();
+            });
+        }
+
+        // 显示成功消息
+        function showSuccessMessage() {
+            successMessage.classList.add('active');
+            
+            // 4秒后自动隐藏
+            setTimeout(() => {
+                successMessage.classList.remove('active');
+            }, 4000);
+        }
+
+        // 播放支付宝成功音效
+        function playAlipaySuccessSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // 支付宝成功音效
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
+                oscillator.frequency.exponentialRampToValueAtTime(1318.51, audioContext.currentTime + 0.3); // E6
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.6);
+            } catch (e) {
+                console.log('成功音效播放失败:', e);
+            }
+        }
+
+        // 打开支付宝
+        function openAlipay() {
+            // 支付宝URL Scheme
+            const alipayUrl = 'alipays://';
+            const alipayQRUrl = 'https://qr.alipay.com/fkx16888sg0fsnkrzojbbf5';
+            
+            // 尝试打开支付宝APP
+            window.location.href = alipayUrl;
+            
+            // 如果打不开，3秒后显示备用方案
+            setTimeout(() => {
+                if (document.hasFocus()) {
+                    // 还在当前页面，说明没打开支付宝
+                    window.open(alipayQRUrl, '_blank');
+                    
+                    // 显示提示
+                    const successContent = document.querySelector('.success-content');
+                    if (successContent) {
+                        const newHTML = `
+                            <div class="success-icon">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <h2 class="success-text">请扫描二维码</h2>
+                            <p class="success-detail">使用支付宝扫描上方二维码领取</p>
+                            <p style="color:#999; font-size:0.9rem; margin-top:20px;">
+                                <i class="fas fa-info-circle"></i>
+                                或手动搜索：支付宝红包
+                            </p>
+                        `;
+                        successContent.innerHTML = newHTML + successContent.innerHTML.substring(successContent.innerHTML.indexOf('<div class="action-buttons"'));
+                    }
+                }
+            }, 3000);
+        }
+
+        // 页面初始化
+        function init() {
+            // 初始创建飘落元素
+            createFallingElements();
+            
+            // 每10秒重新生成飘落效果
+            setInterval(createFallingElements, 10000);
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // 空格键或回车键开红包
+                if ((e.key === ' ' || e.key === 'Enter') && !redpacket.classList.contains('opened-redpacket')) {
+                    openRedpacket();
+                    e.preventDefault();
+                }
+                
+                // Ctrl+C 或 Cmd+C 复制口令
+                if ((e.ctrlKey || e.metaKey) && e.key === 'c' && redpacket.classList.contains('opened-redpacket')) {
+                    copyPassword();
+                    e.preventDefault();
+                }
+            });
+            
+            // 点击红包外部区域也可以开红包（移动端友好）
+            openArea.addEventListener('click', openRedpacket);
+            
+            // 触摸开始效果
+            const openButton = document.querySelector('.open-button');
+            if (openButton) {
+                openButton.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                openButton.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            }
+            
+            // 自动聚焦到口令文本（打开红包后）
+            redpacketContent.addEventListener('transitionend', function() {
+                if (this.classList.contains('opened')) {
+                    passwordText.focus();
+                    passwordText.select();
+                }
+            });
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
