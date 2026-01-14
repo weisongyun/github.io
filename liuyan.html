@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>时光记忆 - 留言墙</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --primary-color: #0d1b2a;
+            --secondary-color: #1b263b;
+            --accent-color: #415a77;
+            --highlight-color: #778da9;
+            --text-light: #e0e1dd;
+            --text-dim: rgba(224, 225, 221, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border-radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --success-color: #4ecdc4;
+            --error-color: #ff6b6b;
+            --warning-color: #ffd166;
+            --message-bg: rgba(65, 90, 119, 0.2);
+            --delete-color: #ff5252;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* 背景动画 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(119, 141, 169, 0.05);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .circle-1 {
+            width: 150px;
+            height: 150px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 100px;
+            height: 100px;
+            top: 70%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            bottom: 10%;
+            left: 5%;
+            animation-delay: 7s;
+        }
+
+        .circle-4 {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            right: 20%;
+            animation-delay: 12s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* 主容器 */
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: var(--text-light);
+            box-shadow: var(--shadow);
+            border: 3px solid rgba(119, 141, 169, 0.3);
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #e0e1dd, #778da9, #e0e1dd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 30px;
+        }
+
+        /* 留言表单 */
+        .message-form-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .form-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-title i {
+            color: var(--highlight-color);
+        }
+
+        .message-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            background: rgba(13, 27, 42, 0.6);
+            border: 1px solid rgba(119, 141, 169, 0.3);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 2px rgba(119, 141, 169, 0.2);
+        }
+
+        .form-input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-input::placeholder {
+            color: rgba(224, 225, 221, 0.5);
+        }
+
+        .message-input {
+            min-height: 120px;
+            padding: 15px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        .message-input::placeholder {
+            font-size: 0.95rem;
+        }
+
+        .character-count {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        .character-count.warning {
+            color: var(--warning-color);
+        }
+
+        .character-count.error {
+            color: var(--error-color);
+        }
+
+        /* 锁定提示 */
+        .lock-notice {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .lock-notice.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .lock-icon {
+            font-size: 2rem;
+            color: var(--error-color);
+            margin-bottom: 15px;
+        }
+
+        .lock-title {
+            color: var(--error-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .lock-text {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .countdown-timer {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--error-color);
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .countdown-timer i {
+            font-size: 1.2rem;
+        }
+
+        /* 提交按钮 */
+        .submit-button {
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: rgba(119, 141, 169, 0.3);
+        }
+
+        /* 留言墙标题 */
+        .wall-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 40px 0 20px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wall-title i {
+            color: var(--highlight-color);
+        }
+
+        .message-count {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-left: auto;
+            background: rgba(119, 141, 169, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(119, 141, 169, 0.2);
+        }
+
+        /* 留言墙 */
+        .message-wall {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* 留言卡片 */
+        .message-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease;
+        }
+
+        .message-card:hover {
+            border-color: rgba(119, 141, 169, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-card.deleting {
+            border-color: var(--delete-color);
+            background: rgba(255, 82, 82, 0.05);
+            animation: shake 0.5s ease;
+        }
+
+        .message-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-color), var(--highlight-color));
+        }
+
+        .message-card.deleting::before {
+            background: linear-gradient(to bottom, var(--delete-color), #ff6b6b);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .message-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .message-time {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .message-content {
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding-left: 5px;
+            word-break: break-word;
+        }
+
+        .message-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(119, 141, 169, 0.1);
+        }
+
+        .message-id {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            background: rgba(119, 141, 169, 0.1);
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: rgba(119, 141, 169, 0.1);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            color: var(--highlight-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: rgba(119, 141, 169, 0.2);
+            transform: scale(1.05);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .delete-btn {
+            background: rgba(255, 82, 82, 0.1);
+            border-color: rgba(255, 82, 82, 0.3);
+            color: var(--delete-color);
+        }
+
+        .delete-btn:hover:not(:disabled) {
+            background: rgba(255, 82, 82, 0.2);
+        }
+
+        /* 密码验证模态框 */
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 27, 42, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .password-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .password-modal-content {
+            width: 90%;
+            max-width: 400px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(119, 141, 169, 0.3);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: scaleIn 0.3s ease;
+        }
+
+        .password-modal-header {
+            padding: 25px 25px 15px;
+            text-align: center;
+            background: rgba(255, 82, 82, 0.1);
+        }
+
+        .password-modal-icon {
+            font-size: 3rem;
+            color: var(--delete-color);
+            margin-bottom: 15px;
+        }
+
+        .password-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--delete-color);
+            margin-bottom: 10px;
+        }
+
+        .password-modal-subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .password-modal-body {
+            padding: 25px;
+        }
+
+        .password-input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            background: rgba(13, 27, 42, 0.6);
+            border: 1px solid rgba(119, 141, 169, 0.3);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--delete-color);
+            box-shadow: 0 0 0 2px rgba(255, 82, 82, 0.2);
+        }
+
+        .password-input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--delete-color);
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .password-error {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            height: 0;
+            transition: all 0.3s ease;
+        }
+
+        .password-error.show {
+            opacity: 1;
+            height: auto;
+        }
+
+        .password-modal-footer {
+            padding: 20px 25px 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .password-modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .cancel-btn {
+            background: rgba(119, 141, 169, 0.1);
+            color: var(--highlight-color);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+        }
+
+        .cancel-btn:hover {
+            background: rgba(119, 141, 169, 0.2);
+        }
+
+        .confirm-delete-btn {
+            background: linear-gradient(135deg, var(--delete-color), #ff6b6b);
+            color: white;
+            border: none;
+        }
+
+        .confirm-delete-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 82, 82, 0.3);
+        }
+
+        .confirm-delete-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(119, 141, 169, 0.2);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: rgba(119, 141, 169, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid rgba(119, 141, 169, 0.2);
+            margin-top: 20px;
+        }
+
+        .footer-text {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .message-form-container {
+                padding: 20px;
+            }
+            
+            .message-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .message-footer {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .message-actions {
+                align-self: flex-end;
+            }
+            
+            .password-modal-footer {
+                flex-direction: column;
+            }
+            
+            .password-modal-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .logo-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-title {
+                font-size: 1.2rem;
+            }
+            
+            .message-card {
+                padding: 20px;
+            }
+            
+            .wall-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="background-animation">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+        <div class="floating-circle circle-4"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h1 class="logo-text">时光记忆</h1>
+            </div>
+            <h2 class="page-title">留言墙</h2>
+            <p class="page-subtitle">留下你的足迹，分享你的心声</p>
+        </div>
+
+        <!-- 留言表单 -->
+        <div class="message-form-container">
+            <h3 class="form-title">
+                <i class="fas fa-pen"></i>
+                <span>写下你的留言</span>
+            </h3>
+            
+            <form class="message-form" id="messageForm">
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="userName" 
+                        placeholder="请输入你的昵称（最多10个字符）" 
+                        maxlength="10"
+                        required
+                    >
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-comment input-icon"></i>
+                    <textarea 
+                        class="form-input message-input" 
+                        id="messageContent" 
+                        placeholder="在这里写下你想说的话...（最多200个字符）" 
+                        maxlength="200"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="character-count" id="charCount">0/200</div>
+                
+                <button type="submit" class="submit-button" id="submitButton">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>发布留言</span>
+                </button>
+            </form>
+            
+            <!-- 锁定提示 -->
+            <div class="lock-notice" id="lockNotice">
+                <div class="lock-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="lock-title">留言功能已锁定</h3>
+                <p class="lock-text">为了维护良好的留言环境，每次留言后需要等待10秒才能再次留言</p>
+                <div class="countdown-timer" id="countdownTimer">
+                    <i class="fas fa-clock"></i>
+                    <span id="countdownDisplay">10</span>
+                    <span>秒</span>
+                </div>
+                <p class="lock-text" style="font-size: 0.9rem;">请耐心等待，时间到了会自动解锁</p>
+            </div>
+        </div>
+
+        <!-- 留言墙 -->
+        <div class="wall-title">
+            <i class="fas fa-th-large"></i>
+            <span>留言墙</span>
+            <div class="message-count" id="messageCount">0 条留言</div>
+        </div>
+        
+        <div class="message-wall" id="messageWall">
+            <!-- 留言将通过JavaScript动态生成 -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">
+                    <i class="far fa-comments"></i>
+                </div>
+                <p class="empty-text">还没有留言，快来写下第一条吧！</p>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p class="footer-text">© 2023 时光记忆轴 | 留言墙系统</p>
+            <p class="footer-text" style="font-size: 0.8rem;">每次留言后需等待10秒才能再次留言，删除留言需要密码验证</p>
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                <span>返回主页面</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 密码验证模态框 -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-modal-content">
+            <div class="password-modal-header">
+                <div class="password-modal-icon">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h3 class="password-modal-title">确认删除留言</h3>
+                <p class="password-modal-subtitle">删除操作不可恢复，请输入删除密码以确认</p>
+            </div>
+            
+            <div class="password-modal-body">
+                <div class="password-input-group">
+                    <i class="fas fa-key password-input-icon"></i>
+                    <input 
+                        type="password" 
+                        class="password-input" 
+                        id="deletePassword" 
+                        placeholder="请输入删除密码"
+                        autocomplete="off"
+                        required
+                    >
+                </div>
+                
+                <div class="password-error" id="passwordError">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>密码错误，请重新输入</span>
+                </div>
+                
+                <div class="hint-text" style="font-size: 0.85rem; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span>提示：删除密码请联系管理员获取</span>
+                </div>
+            </div>
+            
+            <div class="password-modal-footer">
+                <button class="password-modal-btn cancel-btn" id="cancelDelete">
+                    取消
+                </button>
+                <button class="password-modal-btn confirm-delete-btn" id="confirmDelete">
+                    <i class="fas fa-trash-alt"></i>
+                    确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const DELETE_PASSWORD = "ziqing520"; // 删除密码
+        
+        // 留言数据（存储在本地，模拟后端）
+        let messages = JSON.parse(localStorage.getItem('timememory_messages')) || [];
+        
+        // 锁定状态
+        let isLocked = false;
+        let lockTimer = null;
+        let lockRemainingTime = 10; // 10秒锁定时间
+        
+        // 删除相关状态
+        let messageToDelete = null;
+        let deleteAttempts = 0;
+        const MAX_DELETE_ATTEMPTS = 3;
+        
+        // DOM元素
+        const messageForm = document.getElementById('messageForm');
+        const userNameInput = document.getElementById('userName');
+        const messageContentInput = document.getElementById('messageContent');
+        const submitButton = document.getElementById('submitButton');
+        const charCount = document.getElementById('charCount');
+        const lockNotice = document.getElementById('lockNotice');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const messageWall = document.getElementById('messageWall');
+        const emptyState = document.getElementById('emptyState');
+        const messageCount = document.getElementById('messageCount');
+        const passwordModal = document.getElementById('passwordModal');
+        const deletePasswordInput = document.getElementById('deletePassword');
+        const passwordError = document.getElementById('passwordError');
+        const cancelDeleteBtn = document.getElementById('cancelDelete');
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+        
+        // 初始化
+        function init() {
+            // 加载现有留言
+            renderMessages();
+            
+            // 设置字符计数
+            updateCharCount();
+            
+            // 检查锁定状态
+            checkLockState();
+            
+            // 监听输入
+            messageContentInput.addEventListener('input', updateCharCount);
+            
+            // 监听表单提交
+            messageForm.addEventListener('submit', handleSubmit);
+            
+            // 监听密码输入
+            deletePasswordInput.addEventListener('input', hidePasswordError);
+            deletePasswordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmDelete();
+                }
+            });
+            
+            // 监听删除按钮
+            cancelDeleteBtn.addEventListener('click', closePasswordModal);
+            confirmDeleteBtn.addEventListener('click', confirmDelete);
+            
+            // 页面加载时聚焦到昵称输入框
+            userNameInput.focus();
+        }
+        
+        // 更新字符计数
+        function updateCharCount() {
+            const length = messageContentInput.value.length;
+            const maxLength = parseInt(messageContentInput.getAttribute('maxlength'));
+            
+            charCount.textContent = `${length}/${maxLength}`;
+            
+            // 根据长度改变颜色
+            charCount.classList.remove('warning', 'error');
+            if (length > maxLength * 0.8) {
+                charCount.classList.add('warning');
+            }
+            if (length >= maxLength) {
+                charCount.classList.add('error');
+            }
+        }
+        
+        // 生成留言ID
+        function generateMessageId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `MSG-${timestamp}-${random}`;
+        }
+        
+        // 格式化时间
+        function formatTime(date) {
+            const now = new Date();
+            const messageDate = new Date(date);
+            const diffMs = now - messageDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) {
+                return '刚刚';
+            } else if (diffMins < 60) {
+                return `${diffMins}分钟前`;
+            } else if (diffHours < 24) {
+                return `${diffHours}小时前`;
+            } else if (diffDays < 7) {
+                return `${diffDays}天前`;
+            } else {
+                return messageDate.toLocaleDateString('zh-CN', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+        
+        // 生成用户头像字母
+        function getAvatarLetter(name) {
+            if (!name || name.trim() === '') return '?';
+            return name.trim().charAt(0).toUpperCase();
+        }
+        
+        // 创建留言卡片
+        function createMessageCard(message) {
+            const card = document.createElement('div');
+            card.className = 'message-card slide-in';
+            card.dataset.id = message.id;
+            
+            const likesCount = message.likes || 0;
+            
+            card.innerHTML = `
+                <div class="message-header">
+                    <div class="message-user">
+                        <div class="user-avatar">${getAvatarLetter(message.userName)}</div>
+                        <div class="user-info">
+                            <div class="user-name">${message.userName || '匿名用户'}</div>
+                            <div class="message-time">
+                                <i class="far fa-clock"></i>
+                                <span>${formatTime(message.timestamp)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-content">${message.content.replace(/\n/g, '<br>')}</div>
+                <div class="message-footer">
+                    <div class="message-id">${message.id}</div>
+                    <div class="message-actions">
+                        <button class="action-btn reply-btn" onclick="replyToMessage('${message.id}')" title="回复">
+                            <i class="fas fa-reply"></i>
+                            <span>回复</span>
+                        </button>
+                        <button class="action-btn like-btn" onclick="likeMessage('${message.id}')" title="点赞">
+                            <i class="${likesCount > 0 ? 'fas' : 'far'} fa-heart"></i>
+                            <span>${likesCount > 0 ? `点赞(${likesCount})` : '点赞'}</span>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="requestDeleteMessage('${message.id}')" title="删除">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>删除</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // 如果有点赞数，设置点赞按钮颜色
+            if (likesCount > 0) {
+                const likeBtn = card.querySelector('.like-btn');
+                likeBtn.style.color = '#ff6b6b';
+            }
+            
+            return card;
+        }
+        
+        // 渲染留言
+        function renderMessages() {
+            // 清空留言墙
+            messageWall.innerHTML = '';
+            
+            if (messages.length === 0) {
+                // 显示空状态
+                emptyState.style.display = 'block';
+                messageWall.appendChild(emptyState);
+            } else {
+                // 隐藏空状态
+                emptyState.style.display = 'none';
+                
+                // 按时间倒序排列（最新的在前面）
+                const sortedMessages = [...messages].sort((a, b) => b.timestamp - a.timestamp);
+                
+                // 添加留言卡片
+                sortedMessages.forEach(message => {
+                    messageWall.appendChild(createMessageCard(message));
+                });
+            }
+            
+            // 更新留言计数
+            messageCount.textContent = `${messages.length} 条留言`;
+        }
+        
+        // 处理表单提交
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            if (isLocked) {
+                alert('请等待解锁后再提交留言');
+                return;
+            }
+            
+            const userName = userNameInput.value.trim();
+            const content = messageContentInput.value.trim();
+            
+            // 验证输入
+            if (!userName || userName.length === 0) {
+                alert('请输入昵称');
+                userNameInput.focus();
+                return;
+            }
+            
+            if (!content || content.length === 0) {
+                alert('请输入留言内容');
+                messageContentInput.focus();
+                return;
+            }
+            
+            if (userName.length > 10) {
+                alert('昵称不能超过10个字符');
+                userNameInput.focus();
+                return;
+            }
+            
+            if (content.length > 200) {
+                alert('留言内容不能超过200个字符');
+                messageContentInput.focus();
+                return;
+            }
+            
+            // 创建留言对象
+            const newMessage = {
+                id: generateMessageId(),
+                userName: userName,
+                content: content,
+                timestamp: Date.now(),
+                likes: 0
+            };
+            
+            // 添加到留言数组
+            messages.unshift(newMessage);
+            
+            // 保存到本地存储
+            localStorage.setItem('timememory_messages', JSON.stringify(messages));
+            
+            // 重新渲染留言
+            renderMessages();
+            
+            // 锁定表单
+            lockForm();
+            
+            // 清空表单
+            messageForm.reset();
+            updateCharCount();
+            
+            // 显示成功提示
+            showSuccessMessage('留言发布成功！已锁定10秒');
+        }
+        
+        // 锁定表单
+        function lockForm() {
+            isLocked = true;
+            submitButton.disabled = true;
+            userNameInput.disabled = true;
+            messageContentInput.disabled = true;
+            lockNotice.classList.add('show');
+            
+            // 开始倒计时
+            startCountdown();
+        }
+        
+        // 解锁表单
+        function unlockForm() {
+            isLocked = false;
+            submitButton.disabled = false;
+            userNameInput.disabled = false;
+            messageContentInput.disabled = false;
+            lockNotice.classList.remove('show');
+            
+            // 清除计时器
+            clearInterval(lockTimer);
+            lockRemainingTime = 10;
+            
+            // 重新聚焦到昵称输入框
+            userNameInput.focus();
+        }
+        
+        // 开始倒计时
+        function startCountdown() {
+            lockRemainingTime = 10;
+            countdownDisplay.textContent = lockRemainingTime;
+            
+            lockTimer = setInterval(() => {
+                lockRemainingTime--;
+                countdownDisplay.textContent = lockRemainingTime;
+                
+                if (lockRemainingTime <= 0) {
+                    unlockForm();
+                }
+            }, 1000);
+        }
+        
+        // 检查锁定状态
+        function checkLockState() {
+            const lockState = localStorage.getItem('timememory_lock');
+            
+            if (lockState) {
+                const lockData = JSON.parse(lockState);
+                const currentTime = Date.now();
+                
+                if (currentTime < lockData.unlockTime) {
+                    // 仍然在锁定状态
+                    const remainingSeconds = Math.ceil((lockData.unlockTime - currentTime) / 1000);
+                    
+                    if (remainingSeconds > 0) {
+                        lockRemainingTime = remainingSeconds;
+                        lockForm();
+                        
+                        // 继续倒计时
+                        setTimeout(() => {
+                            startCountdown();
+                        }, 100);
+                    } else {
+                        // 锁定时间已过，清除锁定状态
+                        localStorage.removeItem('timememory_lock');
+                    }
+                }
+            }
+        }
+        
+        // 保存锁定状态
+        function saveLockState() {
+            const unlockTime = Date.now() + (lockRemainingTime * 1000);
+            localStorage.setItem('timememory_lock', JSON.stringify({ unlockTime }));
+        }
+        
+        // 点赞留言
+        function likeMessage(messageId) {
+            const messageIndex = messages.findIndex(msg => msg.id === messageId);
+            
+            if (messageIndex !== -1) {
+                // 增加点赞数
+                if (!messages[messageIndex].likes) {
+                    messages[messageIndex].likes = 0;
+                }
+                messages[messageIndex].likes++;
+                
+                // 保存到本地存储
+                localStorage.setItem('timememory_messages', JSON.stringify(messages));
+                
+                // 更新UI
+                const likeBtn = document.querySelector(`.message-card[data-id="${messageId}"] .like-btn`);
+                if (likeBtn) {
+                    const icon = likeBtn.querySelector('i');
+                    const countSpan = likeBtn.querySelector('span');
+                    
+                    // 改变图标
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    icon.style.color = '#ff6b6b';
+                    
+                    // 更新计数
+                    countSpan.textContent = `点赞(${messages[messageIndex].likes})`;
+                    
+                    // 添加动画效果
+                    likeBtn.classList.add('pulse');
+                    setTimeout(() => {
+                        likeBtn.classList.remove('pulse');
+                    }, 1000);
+                }
+            }
+        }
+        
+        // 回复留言
+        function replyToMessage(messageId) {
+            const message = messages.find(msg => msg.id === messageId);
+            
+            if (message) {
+                // 在输入框中添加回复格式
+                const replyText = `@${message.userName} `;
+                messageContentInput.value = replyText + (messageContentInput.value || '');
+                messageContentInput.focus();
+                
+                // 更新字符计数
+                updateCharCount();
+                
+                // 滚动到表单
+                document.querySelector('.message-form-container').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // 显示提示
+                showSuccessMessage(`正在回复 @${message.userName}`, 2000);
+            }
+        }
+        
+        // 请求删除留言
+        function requestDeleteMessage(messageId) {
+            messageToDelete = messageId;
+            deleteAttempts = 0;
+            
+            // 显示密码验证模态框
+            openPasswordModal();
+        }
+        
+        // 打开密码验证模态框
+        function openPasswordModal() {
+            deletePasswordInput.value = '';
+            hidePasswordError();
+            passwordModal.classList.add('active');
+            deletePasswordInput.focus();
+        }
+        
+        // 关闭密码验证模态框
+        function closePasswordModal() {
+            passwordModal.classList.remove('active');
+            messageToDelete = null;
+            deleteAttempts = 0;
+            hidePasswordError();
+        }
+        
+        // 隐藏密码错误提示
+        function hidePasswordError() {
+            passwordError.classList.remove('show');
+        }
+        
+        // 显示密码错误提示
+        function showPasswordError() {
+            passwordError.classList.add('show');
+            deletePasswordInput.classList.add('shake');
+            
+            setTimeout(() => {
+                deletePasswordInput.classList.remove('shake');
+            }, 500);
+            
+            // 清空密码输入框
+            deletePasswordInput.value = '';
+            deletePasswordInput.focus();
+        }
+        
+        // 确认删除
+        function confirmDelete() {
+            if (!messageToDelete) return;
+            
+            const password = deletePasswordInput.value.trim();
+            
+            if (!password) {
+                alert('请输入删除密码');
+                deletePasswordInput.focus();
+                return;
+            }
+            
+            // 验证密码
+            if (password === DELETE_PASSWORD) {
+                // 密码正确，执行删除
+                performDelete();
+            } else {
+                // 密码错误
+                deleteAttempts++;
+                
+                if (deleteAttempts >= MAX_DELETE_ATTEMPTS) {
+                    alert(`密码错误次数过多，请稍后再试`);
+                    closePasswordModal();
+                } else {
+                    const remainingAttempts = MAX_DELETE_ATTEMPTS - deleteAttempts;
+                    passwordError.querySelector('span').textContent = `密码错误，您还有 ${remainingAttempts} 次尝试机会`;
+                    showPasswordError();
+                }
+            }
+        }
+        
+        // 执行删除
+        function performDelete() {
+            const messageIndex = messages.findIndex(msg => msg.id === messageToDelete);
+            
+            if (messageIndex !== -1) {
+                // 获取留言内容（用于确认提示）
+                const messageContent = messages[messageIndex].content;
+                const userName = messages[messageIndex].userName;
+                
+                // 显示删除确认动画
+                const messageCard = document.querySelector(`.message-card[data-id="${messageToDelete}"]`);
+                if (messageCard) {
+                    messageCard.classList.add('deleting');
+                    
+                    // 延迟删除，让用户看到删除动画
+                    setTimeout(() => {
+                        messageCard.classList.add('fade-out');
+                        
+                        setTimeout(() => {
+                            // 从数组中删除留言
+                            messages.splice(messageIndex, 1);
+                            
+                            // 保存到本地存储
+                            localStorage.setItem('timememory_messages', JSON.stringify(messages));
+                            
+                            // 重新渲染留言
+                            renderMessages();
+                            
+                            // 显示成功提示
+                            showSuccessMessage('留言删除成功！');
+                            
+                            // 关闭模态框
+                            closePasswordModal();
+                        }, 300);
+                    }, 500);
+                }
+            }
+        }
+        
+        // 显示成功消息
+        function showSuccessMessage(message, duration = 3000) {
+            const successAlert = document.createElement('div');
+            successAlert.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, var(--success-color), #88d3ce);
+                color: white;
+                padding: 15px 30px;
+                border-radius: var(--border-radius);
+                z-index: 1000;
+                box-shadow: var(--shadow);
+                animation: fadeIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            successAlert.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(successAlert);
+            
+            setTimeout(() => {
+                successAlert.style.opacity = '0';
+                successAlert.style.transform = 'translateX(-50%) translateY(-20px)';
+                setTimeout(() => {
+                    if (successAlert.parentNode) {
+                        document.body.removeChild(successAlert);
+                    }
+                }, 300);
+            }, duration);
+        }
+        
+        // 返回主页面
+        function goBack() {
+            // 保存锁定状态
+            if (isLocked && lockRemainingTime > 0) {
+                saveLockState();
+            }
+            
+            // 返回上一页或主页面
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // 页面卸载前保存状态
+        window.addEventListener('beforeunload', function() {
+            if (isLocked && lockRemainingTime > 0) {
+                saveLockState();
+            }
+        });
+        
+        // 添加抖动动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
