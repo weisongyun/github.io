@@ -466,7 +466,7 @@
             object-fit: cover;
         }
 
-        /* 图片信息卡片 */
+        /* 图片信息卡片 - 添加打字机效果 */
         .image-info-card {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -475,6 +475,32 @@
             padding: 25px;
             margin-top: 30px;
             box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 打字机效果覆盖层 */
+        .typewriter-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            z-index: 2;
+            animation: typewriterReveal 1.5s ease-out forwards;
+            transform-origin: left;
+        }
+
+        @keyframes typewriterReveal {
+            0% {
+                transform: scaleX(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scaleX(0);
+                opacity: 0;
+            }
         }
 
         .info-header {
@@ -484,6 +510,8 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 15px;
+            position: relative;
+            z-index: 3;
         }
 
         .info-title {
@@ -496,6 +524,8 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 3;
         }
 
         .info-tag {
@@ -505,12 +535,30 @@
             background: rgba(119, 141, 169, 0.1);
             border-radius: 12px;
             border: 1px solid rgba(119, 141, 169, 0.2);
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.5s ease-out forwards;
+            animation-delay: 1.8s;
+        }
+
+        /* 渐显动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .info-content {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 25px;
+            position: relative;
+            z-index: 3;
         }
 
         @media (max-width: 768px) {
@@ -519,12 +567,50 @@
             }
         }
 
+        /* 打字机效果的文字 */
         .info-description {
             color: var(--text-dim);
             line-height: 1.7;
             font-size: 1rem;
+            position: relative;
+            min-height: 120px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 0.8s;
         }
 
+        /* 打字机光标效果 */
+        .info-description::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 0;
+            width: 2px;
+            height: 1.2em;
+            background-color: var(--highlight-color);
+            animation: blink 1s infinite;
+            opacity: 0;
+        }
+
+        .info-description.typing::after {
+            opacity: 1;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 详情项渐显效果 */
         .info-details {
             display: flex;
             flex-direction: column;
@@ -539,16 +625,76 @@
             font-size: 0.9rem;
             padding: 8px 0;
             border-bottom: 1px solid rgba(119, 141, 169, 0.1);
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInRight 0.6s ease-out forwards;
         }
+
+        .detail-item:nth-child(1) { animation-delay: 1.2s; }
+        .detail-item:nth-child(2) { animation-delay: 1.4s; }
+        .detail-item:nth-child(3) { animation-delay: 1.6s; }
+        .detail-item:nth-child(4) { animation-delay: 1.8s; }
 
         .detail-item:last-child {
             border-bottom: none;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .detail-icon {
             color: var(--highlight-color);
             width: 20px;
             text-align: center;
+        }
+
+        /* 页脚渐显效果 */
+        .footer {
+            text-align: center;
+            padding: 25px 0;
+            border-top: 1px solid rgba(119, 141, 169, 0.2);
+            margin-top: 30px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+            animation-delay: 2s;
+        }
+
+        .footer-text {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 25px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-delay: 2.2s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         /* 加载动画 */
@@ -577,40 +723,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        /* 页脚 */
-        .footer {
-            text-align: center;
-            padding: 25px 0;
-            border-top: 1px solid rgba(119, 141, 169, 0.2);
-            margin-top: 30px;
-        }
-
-        .footer-text {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            margin-bottom: 10px;
-        }
-
-        .back-btn {
-            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
-            color: var(--text-light);
-            border: none;
-            border-radius: var(--border-radius);
-            padding: 10px 25px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         /* 响应式设计 - 移动端优化 */
@@ -821,6 +933,7 @@
             .info-description {
                 font-size: 0.9rem;
                 line-height: 1.6;
+                min-height: 100px;
             }
             
             .detail-item {
@@ -986,8 +1099,11 @@
             <!-- 缩略图将通过JavaScript动态生成 -->
         </div>
 
-        <!-- 图片信息卡片 -->
+        <!-- 图片信息卡片（添加打字机效果） -->
         <div class="image-info-card" id="imageInfoCard">
+            <!-- 打字机效果覆盖层 -->
+            <div class="typewriter-overlay"></div>
+            
             <div class="info-header">
                 <h3 class="info-title" id="infoTitle">阿尔卑斯山雪景</h3>
                 <div class="info-tags" id="infoTags">
@@ -995,7 +1111,7 @@
                 </div>
             </div>
             <div class="info-content">
-                <div class="info-description" id="infoDescription">
+                <div class="info-description typing" id="infoDescription">
                     瑞士阿尔卑斯山脉的壮丽雪景，白雪覆盖的山峰在阳光下闪闪发光。阿尔卑斯山脉是欧洲最高大、最雄伟的山脉，西起法国东南部的尼斯，经瑞士、德国南部、意大利北部，东到维也纳盆地，绵延1200公里。山势高峻，平均海拔约3000米。
                 </div>
                 <div class="info-details">
@@ -1301,6 +1417,85 @@
             });
         }
 
+        // 重置打字机动画
+        function resetTypewriterAnimation() {
+            const infoCard = document.getElementById('imageInfoCard');
+            
+            // 移除现有的打字机覆盖层
+            const existingOverlay = infoCard.querySelector('.typewriter-overlay');
+            if (existingOverlay) {
+                existingOverlay.remove();
+            }
+            
+            // 创建新的打字机覆盖层
+            const typewriterOverlay = document.createElement('div');
+            typewriterOverlay.className = 'typewriter-overlay';
+            infoCard.insertBefore(typewriterOverlay, infoCard.firstChild);
+            
+            // 重置动画
+            void typewriterOverlay.offsetWidth; // 触发重排
+            typewriterOverlay.style.animation = 'none';
+            setTimeout(() => {
+                typewriterOverlay.style.animation = 'typewriterReveal 1.5s ease-out forwards';
+            }, 10);
+            
+            // 重置所有动画元素的样式
+            const infoTags = document.querySelectorAll('.info-tag');
+            const detailItems = document.querySelectorAll('.detail-item');
+            const infoDesc = document.querySelector('.info-description');
+            const footer = document.querySelector('.footer');
+            const backBtn = document.querySelector('.back-btn');
+            
+            // 重置信息描述
+            infoDesc.style.animation = 'none';
+            infoDesc.style.opacity = '0';
+            
+            // 重置标签
+            infoTags.forEach(tag => {
+                tag.style.animation = 'none';
+                tag.style.opacity = '0';
+                tag.style.transform = 'translateY(10px)';
+            });
+            
+            // 重置详情项
+            detailItems.forEach((item, index) => {
+                item.style.animation = 'none';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-20px)';
+            });
+            
+            // 重置页脚
+            footer.style.animation = 'none';
+            footer.style.opacity = '0';
+            
+            // 重置返回按钮
+            backBtn.style.animation = 'none';
+            backBtn.style.opacity = '0';
+            backBtn.style.transform = 'translateY(10px)';
+            
+            // 重新应用动画
+            setTimeout(() => {
+                infoDesc.style.animation = 'fadeIn 0.8s ease-out forwards';
+                infoDesc.style.animationDelay = '0.8s';
+                
+                infoTags.forEach((tag, index) => {
+                    tag.style.animation = 'fadeInUp 0.5s ease-out forwards';
+                    tag.style.animationDelay = `${1.8 + index * 0.1}s`;
+                });
+                
+                detailItems.forEach((item, index) => {
+                    item.style.animation = 'slideInRight 0.6s ease-out forwards';
+                    item.style.animationDelay = `${1.2 + index * 0.2}s`;
+                });
+                
+                footer.style.animation = 'fadeInUp 1s ease-out forwards';
+                footer.style.animationDelay = '2s';
+                
+                backBtn.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                backBtn.style.animationDelay = '2.2s';
+            }, 100);
+        }
+
         // 更新轮播位置
         function updateCarousel() {
             if (isTransitioning) return;
@@ -1323,6 +1518,9 @@
             
             // 更新计数器
             slideCounter.textContent = `${currentSlideIndex + 1} / ${imagesData.length}`;
+            
+            // 重置打字机动画
+            resetTypewriterAnimation();
             
             // 预加载下一张图片
             preloadNextImage();
@@ -1558,6 +1756,11 @@
                 const img = new Image();
                 img.src = imagesData[i].imageUrl;
             }
+            
+            // 初始打字机动画
+            setTimeout(() => {
+                resetTypewriterAnimation();
+            }, 500);
         }
 
         // 页面加载完成后初始化
