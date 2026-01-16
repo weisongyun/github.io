@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>优雅图库 - 图片管理展示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #00adb5;
+            --highlight-color: #8d93ab;
+            --text-light: #eeeeee;
+            --text-dim: rgba(238, 238, 238, 0.7);
+            --card-bg: rgba(22, 33, 62, 0.8);
+            --hover-bg: rgba(0, 173, 181, 0.1);
+            --border-radius: 16px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景粒子效果 */
+        .particles-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 173, 181, 0.1);
+            border-radius: 50%;
+            animation: particle-float 20s infinite linear;
+        }
+
+        @keyframes particle-float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        /* 主容器 */
+        .app-container {
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 头部导航 */
+        .header {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto 40px;
+            padding: 25px 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-color), #008c93);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: var(--text-light);
+            box-shadow: 0 8px 20px rgba(0, 173, 181, 0.3);
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #eeeeee, var(--accent-color), #eeeeee);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, var(--accent-color), #008c93);
+            color: var(--text-light);
+            border: none;
+            border-radius: 50px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 5px 15px rgba(0, 173, 181, 0.3);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 173, 181, 0.4);
+        }
+
+        .upload-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .settings-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(141, 147, 171, 0.1);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .settings-btn:hover {
+            background: rgba(0, 173, 181, 0.2);
+            border-color: var(--accent-color);
+            transform: rotate(90deg);
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-title i {
+            font-size: 1.2rem;
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+        }
+
+        .filter-label {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid rgba(141, 147, 171, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300adb5' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 45px;
+        }
+
+        .filter-select:hover, .filter-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 173, 181, 0.2);
+            outline: none;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 18px 14px 50px;
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid rgba(141, 147, 171, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 173, 181, 0.2);
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+
+        .stats-section {
+            background: rgba(0, 173, 181, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(0, 173, 181, 0.2);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(141, 147, 171, 0.1);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .stat-value {
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* 图片网格区域 */
+        .gallery-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .gallery-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gallery-title i {
+            color: var(--accent-color);
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: rgba(141, 147, 171, 0.1);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .view-btn.active {
+            background: rgba(0, 173, 181, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .view-btn:hover:not(.active) {
+            background: rgba(141, 147, 171, 0.2);
+        }
+
+        /* 图片网格 */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            transition: var(--transition);
+        }
+
+        .image-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            cursor: pointer;
+            transition: var(--transition);
+            aspect-ratio: 4/3;
+        }
+
+        .image-grid.list-view .image-item {
+            aspect-ratio: 16/5;
+            display: flex;
+        }
+
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+
+        .image-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .image-grid.list-view .image-thumbnail {
+            width: 30%;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 40%, rgba(26, 26, 46, 0.9) 90%);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .image-item:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-grid.list-view .image-overlay {
+            position: relative;
+            flex: 1;
+            background: transparent;
+            opacity: 1;
+            padding: 15px 25px;
+            justify-content: center;
+        }
+
+        .image-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .image-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .image-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .image-item:hover .image-actions {
+            opacity: 1;
+        }
+
+        .image-grid.list-view .image-actions {
+            position: static;
+            opacity: 1;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* 详情模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid rgba(141, 147, 171, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .close-modal {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: rgba(141, 147, 171, 0.1);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .modal-body {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-image-container {
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid rgba(141, 147, 171, 0.2);
+            aspect-ratio: 4/3;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-info {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .info-section {
+            background: rgba(22, 33, 62, 0.6);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(141, 147, 171, 0.2);
+        }
+
+        .info-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-title i {
+            font-size: 1rem;
+        }
+
+        .info-content {
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: rgba(141, 147, 171, 0.3);
+            margin-bottom: 25px;
+        }
+
+        .empty-title {
+            font-size: 1.8rem;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+        }
+
+        .empty-description {
+            color: var(--text-dim);
+            max-width: 400px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(141, 147, 171, 0.3);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .header {
+                padding: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .logo-text {
+                font-size: 1.8rem;
+            }
+            
+            .upload-btn {
+                padding: 12px 25px;
+                font-size: 0.95rem;
+            }
+            
+            .gallery-section, .sidebar {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .nav-controls {
+                justify-content: space-between;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 20px;
+            }
+            
+            .modal-header, .modal-body {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            
+            .upload-btn span {
+                display: none;
+            }
+            
+            .upload-btn {
+                padding: 14px;
+                width: 50px;
+                height: 50px;
+            }
+            
+            .sidebar {
+                padding: 20px;
+            }
+            
+            .gallery-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .view-controls {
+                align-self: flex-start;
+            }
+        }
+
+        /* 防止文字选择 */
+        .image-item, .view-btn, .action-btn, .upload-btn, .settings-btn {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子 -->
+    <div class="particles-background" id="particlesBackground"></div>
+
+    <!-- 主容器 -->
+    <div class="app-container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fas fa-images"></i>
+                </div>
+                <h1 class="logo-text">优雅图库</h1>
+            </div>
+            
+            <div class="nav-controls">
+                <button class="upload-btn" id="uploadBtn">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>上传图片</span>
+                </button>
+                <input type="file" id="uploadInput" class="upload-input" accept="image/*" multiple>
+                
+                <button class="settings-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 侧边栏 -->
+            <aside class="sidebar">
+                <h2 class="sidebar-title">
+                    <i class="fas fa-sliders-h"></i>
+                    筛选与统计
+                </h2>
+                
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索图片名称或描述...">
+                </div>
+                
+                <div class="filter-section">
+                    <label class="filter-label">分类筛选</label>
+                    <select class="filter-select" id="categoryFilter">
+                        <option value="all">所有分类</option>
+                        <option value="landscape">风景</option>
+                        <option value="portrait">人像</option>
+                        <option value="urban">城市</option>
+                        <option value="nature">自然</option>
+                        <option value="abstract">抽象</option>
+                    </select>
+                </div>
+                
+                <div class="filter-section">
+                    <label class="filter-label">排序方式</label>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="newest">最新上传</option>
+                        <option value="oldest">最早上传</option>
+                        <option value="name">名称排序</option>
+                        <option value="size">文件大小</option>
+                    </select>
+                </div>
+                
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <span class="stat-label">图片总数</span>
+                        <span class="stat-value" id="totalImages">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">总大小</span>
+                        <span class="stat-value" id="totalSize">0 MB</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最后更新</span>
+                        <span class="stat-value" id="lastUpdate">刚刚</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 图库区域 -->
+            <section class="gallery-section">
+                <div class="gallery-header">
+                    <h2 class="gallery-title">
+                        <i class="fas fa-th-large"></i>
+                        我的图片库
+                    </h2>
+                    
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 图片网格 -->
+                <div class="image-grid" id="imageGrid">
+                    <!-- 图片将通过JavaScript动态生成 -->
+                </div>
+                
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <h3 class="empty-title">图库空空如也</h3>
+                    <p class="empty-description">
+                        点击上方的"上传图片"按钮，开始添加您的第一张图片
+                    </p>
+                    <button class="upload-btn" id="emptyUploadBtn">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>立即上传</span>
+                    </button>
+                </div>
+                
+                <!-- 加载动画 -->
+                <div class="loader" id="loader">
+                    <div class="loader-spinner"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 图片详情模态框 -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">图片详情</h3>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img class="modal-image" id="modalImage" src="" alt="">
+                </div>
+                
+                <div class="modal-info">
+                    <div class="info-section">
+                        <h4 class="info-title">
+                            <i class="fas fa-info-circle"></i>
+                            描述信息
+                        </h4>
+                        <p class="info-content" id="modalDescription">
+                            这里将显示图片的详细描述信息。
+                        </p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4 class="info-title">
+                            <i class="fas fa-file-alt"></i>
+                            文件信息
+                        </h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">文件名</span>
+                                <span class="info-value" id="modalFileName">example.jpg</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">文件大小</span>
+                                <span class="info-value" id="modalFileSize">2.5 MB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">上传时间</span>
+                                <span class="info-value" id="modalUploadTime">2023-10-01</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">图片尺寸</span>
+                                <span class="info-value" id="modalDimensions">1920x1080</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4 class="info-title">
+                            <i class="fas fa-tags"></i>
+                            标签分类
+                        </h4>
+                        <div class="info-grid" id="modalTags">
+                            <!-- 标签将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 图片数据管理
+        class ImageGallery {
+            constructor() {
+                this.images = [];
+                this.filteredImages = [];
+                this.currentView = 'grid';
+                this.currentImage = null;
+                this.storageKey = 'elegantImageGallery';
+                
+                // DOM元素
+                this.elements = {
+                    imageGrid: document.getElementById('imageGrid'),
+                    emptyState: document.getElementById('emptyState'),
+                    loader: document.getElementById('loader'),
+                    uploadBtn: document.getElementById('uploadBtn'),
+                    uploadInput: document.getElementById('uploadInput'),
+                    emptyUploadBtn: document.getElementById('emptyUploadBtn'),
+                    searchInput: document.getElementById('searchInput'),
+                    categoryFilter: document.getElementById('categoryFilter'),
+                    sortFilter: document.getElementById('sortFilter'),
+                    viewButtons: document.querySelectorAll('.view-btn'),
+                    imageModal: document.getElementById('imageModal'),
+                    closeModal: document.getElementById('closeModal'),
+                    modalImage: document.getElementById('modalImage'),
+                    modalTitle: document.getElementById('modalTitle'),
+                    modalDescription: document.getElementById('modalDescription'),
+                    modalFileName: document.getElementById('modalFileName'),
+                    modalFileSize: document.getElementById('modalFileSize'),
+                    modalUploadTime: document.getElementById('modalUploadTime'),
+                    modalDimensions: document.getElementById('modalDimensions'),
+                    modalTags: document.getElementById('modalTags'),
+                    totalImages: document.getElementById('totalImages'),
+                    totalSize: document.getElementById('totalSize'),
+                    lastUpdate: document.getElementById('lastUpdate')
+                };
+                
+                this.init();
+            }
+            
+            // 初始化
+            init() {
+                this.createParticles();
+                this.loadImages();
+                this.bindEvents();
+                this.updateStats();
+            }
+            
+            // 创建背景粒子
+            createParticles() {
+                const container = document.getElementById('particlesBackground');
+                const particleCount = 30;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    // 随机大小
+                    const size = Math.random() * 4 + 1;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    // 随机位置
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.top = `${Math.random() * 100}%`;
+                    
+                    // 随机动画延迟
+                    particle.style.animationDelay = `${Math.random() * 20}s`;
+                    
+                    // 随机动画速度
+                    const duration = Math.random() * 20 + 20;
+                    particle.style.animationDuration = `${duration}s`;
+                    
+                    container.appendChild(particle);
+                }
+            }
+            
+            // 绑定事件
+            bindEvents() {
+                // 上传按钮
+                this.elements.uploadBtn.addEventListener('click', () => this.elements.uploadInput.click());
+                this.elements.emptyUploadBtn.addEventListener('click', () => this.elements.uploadInput.click());
+                this.elements.uploadInput.addEventListener('change', (e) => this.handleImageUpload(e));
+                
+                // 搜索和筛选
+                this.elements.searchInput.addEventListener('input', () => this.filterImages());
+                this.elements.categoryFilter.addEventListener('change', () => this.filterImages());
+                this.elements.sortFilter.addEventListener('change', () => this.filterImages());
+                
+                // 视图切换
+                this.elements.viewButtons.forEach(btn => {
+                    btn.addEventListener('click', () => this.switchView(btn.dataset.view));
+                });
+                
+                // 模态框
+                this.elements.closeModal.addEventListener('click', () => this.closeModal());
+                this.elements.imageModal.addEventListener('click', (e) => {
+                    if (e.target === this.elements.imageModal) {
+                        this.closeModal();
+                    }
+                });
+                
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeModal();
+                    }
+                });
+                
+                // 设置按钮
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    alert('设置功能即将推出！');
+                });
+            }
+            
+            // 加载图片
+            loadImages() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        this.images = data.images || [];
+                        this.filteredImages = [...this.images];
+                        this.renderGallery();
+                    } catch (e) {
+                        console.error('加载图片数据失败:', e);
+                        this.images = [];
+                        this.filteredImages = [];
+                    }
+                } else {
+                    // 初始示例图片
+                    this.images = this.getSampleImages();
+                    this.filteredImages = [...this.images];
+                    this.renderGallery();
+                }
+                
+                this.elements.loader.style.display = 'none';
+            }
+            
+            // 获取示例图片
+            getSampleImages() {
+                return [
+                    {
+                        id: '1',
+                        name: '阿尔卑斯山雪景',
+                        description: '瑞士阿尔卑斯山脉的壮丽雪景，白雪覆盖的山峰在阳光下闪闪发光。',
+                        category: 'landscape',
+                        tags: ['山景', '雪景', '欧洲', '自然'],
+                        uploadTime: '2023-10-01',
+                        fileSize: '2.5 MB',
+                        dimensions: '1920x1080',
+                        url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '2',
+                        name: '马尔代夫海滩',
+                        description: '马尔代夫清澈见底的海水和洁白细腻的沙滩，人间天堂般的景色。',
+                        category: 'landscape',
+                        tags: ['海洋', '沙滩', '热带', '度假'],
+                        uploadTime: '2023-10-02',
+                        fileSize: '3.1 MB',
+                        dimensions: '2560x1440',
+                        url: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '3',
+                        name: '挪威森林',
+                        description: '挪威茂密的原始森林，阳光透过树叶洒下斑驳光影，宛如童话世界。',
+                        category: 'nature',
+                        tags: ['森林', '北欧', '自然', '徒步'],
+                        uploadTime: '2023-10-03',
+                        fileSize: '2.8 MB',
+                        dimensions: '1920x1080',
+                        url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '4',
+                        name: '圣托里尼日落',
+                        description: '希腊圣托里尼岛的绝美日落，白色的建筑在金色阳光下格外迷人。',
+                        category: 'urban',
+                        tags: ['日落', '海岛', '希腊', '建筑'],
+                        uploadTime: '2023-10-04',
+                        fileSize: '3.5 MB',
+                        dimensions: '2560x1440',
+                        url: 'https://images.unsplash.com/photo-1531326044450-044182b3d490?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '5',
+                        name: '张家界奇峰',
+                        description: '中国张家界的独特石英砂岩峰林，云雾缭绕如仙境般的神秘景色。',
+                        category: 'landscape',
+                        tags: ['山景', '中国', '自然奇观', '云雾'],
+                        uploadTime: '2023-10-05',
+                        fileSize: '3.2 MB',
+                        dimensions: '1920x1080',
+                        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '6',
+                        name: '大堡礁海底',
+                        description: '澳大利亚大堡礁的绚丽海底世界，五彩斑斓的珊瑚和热带鱼群。',
+                        category: 'nature',
+                        tags: ['海洋', '珊瑚', '澳大利亚', '潜水'],
+                        uploadTime: '2023-10-06',
+                        fileSize: '4.1 MB',
+                        dimensions: '2560x1440',
+                        url: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    }
+                ];
+            }
+            
+            // 处理图片上传
+            async handleImageUpload(event) {
+                const files = event.target.files;
+                if (!files || files.length === 0) return;
+                
+                // 显示加载状态
+                this.elements.loader.style.display = 'flex';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    // 检查文件类型
+                    if (!file.type.startsWith('image/')) {
+                        alert(`文件 "${file.name}" 不是图片文件，已跳过。`);
+                        continue;
+                    }
+                    
+                    // 检查文件大小（限制10MB）
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert(`文件 "${file.name}" 超过10MB大小限制，已跳过。`);
+                        continue;
+                    }
+                    
+                    // 创建图片对象
+                    const imageData = await this.createImageData(file);
+                    this.images.unshift(imageData);
+                }
+                
+                // 重置文件输入
+                event.target.value = '';
+                
+                // 更新显示
+                this.filteredImages = [...this.images];
+                this.renderGallery();
+                this.saveToStorage();
+                this.updateStats();
+                
+                // 隐藏加载状态
+                this.elements.loader.style.display = 'none';
+            }
+            
+            // 创建图片数据
+            createImageData(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        
+                        img.onload = () => {
+                            const now = new Date();
+                            const imageData = {
+                                id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                                name: file.name.replace(/\.[^/.]+$/, ""), // 移除扩展名
+                                description: `这是我上传的图片 "${file.name}"`,
+                                category: 'nature',
+                                tags: ['上传'],
+                                uploadTime: now.toISOString().split('T')[0],
+                                fileSize: this.formatFileSize(file.size),
+                                dimensions: `${img.naturalWidth}x${img.naturalHeight}`,
+                                url: e.target.result,
+                                file: file
+                            };
+                            
+                            resolve(imageData);
+                        };
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // 格式化文件大小
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // 筛选图片
+            filterImages() {
+                const searchTerm = this.elements.searchInput.value.toLowerCase();
+                const category = this.elements.categoryFilter.value;
+                const sortBy = this.elements.sortFilter.value;
+                
+                // 筛选
+                let filtered = this.images.filter(image => {
+                    const matchesSearch = searchTerm === '' || 
+                        image.name.toLowerCase().includes(searchTerm) || 
+                        image.description.toLowerCase().includes(searchTerm) ||
+                        image.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                    
+                    const matchesCategory = category === 'all' || image.category === category;
+                    
+                    return matchesSearch && matchesCategory;
+                });
+                
+                // 排序
+                filtered = this.sortImages(filtered, sortBy);
+                
+                this.filteredImages = filtered;
+                this.renderGallery();
+            }
+            
+            // 排序图片
+            sortImages(images, sortBy) {
+                switch (sortBy) {
+                    case 'newest':
+                        return images.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+                    case 'oldest':
+                        return images.sort((a, b) => new Date(a.uploadTime) - new Date(b.uploadTime));
+                    case 'name':
+                        return images.sort((a, b) => a.name.localeCompare(b.name));
+                    case 'size':
+                        return images.sort((a, b) => {
+                            const sizeA = this.parseFileSize(a.fileSize);
+                            const sizeB = this.parseFileSize(b.fileSize);
+                            return sizeB - sizeA;
+                        });
+                    default:
+                        return images;
+                }
+            }
+            
+            // 解析文件大小
+            parseFileSize(sizeString) {
+                const match = sizeString.match(/^([\d.]+)\s*(\w+)$/);
+                if (!match) return 0;
+                
+                const value = parseFloat(match[1]);
+                const unit = match[2].toUpperCase();
+                
+                const units = {
+                    'BYTES': 1,
+                    'KB': 1024,
+                    'MB': 1024 * 1024,
+                    'GB': 1024 * 1024 * 1024
+                };
+                
+                return value * (units[unit] || 1);
+            }
+            
+            // 切换视图
+            switchView(view) {
+                if (view === this.currentView) return;
+                
+                this.currentView = view;
+                this.elements.imageGrid.classList.toggle('list-view', view === 'list');
+                
+                // 更新按钮状态
+                this.elements.viewButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                
+                // 重新渲染（保持当前筛选）
+                this.renderGallery();
+            }
+            
+            // 渲染图库
+            renderGallery() {
+                if (this.filteredImages.length === 0) {
+                    this.elements.imageGrid.innerHTML = '';
+                    this.elements.emptyState.style.display = 'block';
+                    return;
+                }
+                
+                this.elements.emptyState.style.display = 'none';
+                
+                const fragment = document.createDocumentFragment();
+                
+                this.filteredImages.forEach(image => {
+                    const imageItem = this.createImageElement(image);
+                    fragment.appendChild(imageItem);
+                });
+                
+                this.elements.imageGrid.innerHTML = '';
+                this.elements.imageGrid.appendChild(fragment);
+            }
+            
+            // 创建图片元素
+            createImageElement(image) {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                item.dataset.id = image.id;
+                
+                // 图片缩略图
+                const img = document.createElement('img');
+                img.className = 'image-thumbnail';
+                img.src = image.url;
+                img.alt = image.name;
+                img.loading = 'lazy';
+                
+                // 鼠标悬停层
+                const overlay = document.createElement('div');
+                overlay.className = 'image-overlay';
+                
+                // 标题
+                const title = document.createElement('h4');
+                title.className = 'image-title';
+                title.textContent = image.name;
+                
+                // 元数据
+                const meta = document.createElement('div');
+                meta.className = 'image-meta';
+                meta.innerHTML = `
+                    <span><i class="far fa-calendar"></i> ${image.uploadTime}</span>
+                    <span><i class="fas fa-file-alt"></i> ${image.fileSize}</span>
+                `;
+                
+                // 操作按钮
+                const actions = document.createElement('div');
+                actions.className = 'image-actions';
+                actions.innerHTML = `
+                    <button class="action-btn view-btn" data-action="view" title="查看详情">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn download-btn" data-action="download" title="下载图片">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="action-btn delete-btn" data-action="delete" title="删除图片">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                // 组装
+                overlay.appendChild(title);
+                overlay.appendChild(meta);
+                overlay.appendChild(actions);
+                
+                item.appendChild(img);
+                item.appendChild(overlay);
+                
+                // 绑定事件
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.image-actions')) {
+                        this.openImageDetail(image);
+                    }
+                });
+                
+                // 操作按钮事件
+                actions.querySelector('.view-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openImageDetail(image);
+                });
+                
+                actions.querySelector('.download-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.downloadImage(image);
+                });
+                
+                actions.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deleteImage(image.id);
+                });
+                
+                return item;
+            }
+            
+            // 打开图片详情
+            openImageDetail(image) {
+                this.currentImage = image;
+                
+                // 更新模态框内容
+                this.elements.modalImage.src = image.url;
+                this.elements.modalImage.alt = image.name;
+                this.elements.modalTitle.textContent = image.name;
+                this.elements.modalDescription.textContent = image.description;
+                this.elements.modalFileName.textContent = image.name + '.jpg';
+                this.elements.modalFileSize.textContent = image.fileSize;
+                this.elements.modalUploadTime.textContent = image.uploadTime;
+                this.elements.modalDimensions.textContent = image.dimensions;
+                
+                // 更新标签
+                this.elements.modalTags.innerHTML = '';
+                image.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'info-value';
+                    tagElement.style.background = 'rgba(0, 173, 181, 0.1)';
+                    tagElement.style.padding = '5px 12px';
+                    tagElement.style.borderRadius = '20px';
+                    tagElement.style.border = '1px solid rgba(0, 173, 181, 0.2)';
+                    tagElement.textContent = tag;
+                    this.elements.modalTags.appendChild(tagElement);
+                });
+                
+                // 显示模态框
+                this.elements.imageModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // 关闭模态框
+            closeModal() {
+                this.elements.imageModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // 下载图片
+            downloadImage(image) {
+                const link = document.createElement('a');
+                link.href = image.url;
+                link.download = image.name + '.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // 删除图片
+            deleteImage(imageId) {
+                if (!confirm('确定要删除这张图片吗？')) return;
+                
+                // 从数组中移除
+                this.images = this.images.filter(img => img.id !== imageId);
+                this.filteredImages = this.filteredImages.filter(img => img.id !== imageId);
+                
+                // 重新渲染
+                this.renderGallery();
+                this.saveToStorage();
+                this.updateStats();
+                
+                // 如果删除了当前查看的图片，关闭模态框
+                if (this.currentImage && this.currentImage.id === imageId) {
+                    this.closeModal();
+                }
+            }
+            
+            // 保存到本地存储
+            saveToStorage() {
+                const data = {
+                    images: this.images.map(img => {
+                        // 移除文件对象（无法序列化）
+                        const { file, ...rest } = img;
+                        return rest;
+                    }),
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(data));
+                } catch (e) {
+                    console.error('保存数据失败:', e);
+                }
+            }
+            
+            // 更新统计信息
+            updateStats() {
+                // 图片总数
+                this.elements.totalImages.textContent = this.images.length;
+                
+                // 总大小
+                let totalSize = 0;
+                this.images.forEach(img => {
+                    totalSize += this.parseFileSize(img.fileSize);
+                });
+                
+                this.elements.totalSize.textContent = this.formatFileSize(totalSize);
+                
+                // 最后更新时间
+                const now = new Date();
+                this.elements.lastUpdate.textContent = now.toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            const gallery = new ImageGallery();
+            window.gallery = gallery; // 暴露到全局便于调试
+        });
+    </script>
+</body>
+</html>
