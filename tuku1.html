@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>优雅图库 - 渐显与文字特效</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #0f172a;
+            --secondary-color: #1e293b;
+            --accent-color: #3b82f6;
+            --highlight-color: #94a3b8;
+            --text-light: #f1f5f9;
+            --text-dim: rgba(241, 245, 249, 0.7);
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --hover-bg: rgba(59, 130, 246, 0.1);
+            --border-radius: 20px;
+            --shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景渐变动画 */
+        .gradient-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .gradient-layer {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            animation: gradient-rotate 30s infinite linear;
+        }
+
+        @keyframes gradient-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 主容器 */
+        .app-container {
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 头部导航 */
+        .header {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto 40px;
+            padding: 25px 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            animation: slide-down 0.8s ease-out;
+        }
+
+        @keyframes slide-down {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: var(--text-light);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #f1f5f9, var(--accent-color), #8b5cf6, #f1f5f9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 300% auto;
+            animation: shine 6s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% center; }
+            100% { background-position: 300% center; }
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            color: var(--text-light);
+            border: none;
+            border-radius: 50px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .upload-btn:hover::before {
+            left: 100%;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .upload-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .info-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .info-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-color);
+            transform: rotate(180deg);
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 30px;
+            animation: slide-left 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slide-left {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-title i {
+            font-size: 1.2rem;
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+        }
+
+        .filter-label {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            display: block;
+            transition: var(--transition);
+        }
+
+        .filter-label:hover {
+            color: var(--accent-color);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%233b82f6' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 45px;
+        }
+
+        .filter-select:hover, .filter-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 18px 14px 50px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus + .search-icon {
+            color: #8b5cf6;
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        .stats-section {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: var(--transition);
+        }
+
+        .stats-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            padding-left: 10px;
+            padding-right: 10px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 8px;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover .stat-label {
+            color: var(--accent-color);
+        }
+
+        .stat-value {
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover .stat-value {
+            transform: scale(1.1);
+            color: #8b5cf6;
+        }
+
+        /* 图片网格区域 */
+        .gallery-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            min-height: 600px;
+            animation: slide-right 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes slide-right {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .gallery-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gallery-title i {
+            color: var(--accent-color);
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            border-color: transparent;
+            color: var(--text-light);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .view-btn:hover:not(.active) {
+            background: rgba(148, 163, 184, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* 图片网格 - 添加渐显效果 */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            transition: var(--transition);
+        }
+
+        .image-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            cursor: pointer;
+            transition: var(--transition);
+            aspect-ratio: 4/3;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        @keyframes fade-in-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 图片渐显效果 */
+        .image-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+            opacity: 0;
+            animation: image-fade-in 1.2s ease-out 0.6s forwards;
+            filter: brightness(0.9);
+        }
+
+        @keyframes image-fade-in {
+            to {
+                opacity: 1;
+                filter: brightness(1);
+            }
+        }
+
+        .image-grid.list-view .image-item {
+            aspect-ratio: 16/5;
+            display: flex;
+        }
+
+        .image-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-color);
+        }
+
+        .image-grid.list-view .image-thumbnail {
+            width: 30%;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        /* 图片内容区域 - 响应式文字特效 */
+        .image-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 30%, rgba(15, 23, 42, 0.95) 80%);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .image-item:hover .image-content {
+            opacity: 1;
+        }
+
+        .image-grid.list-view .image-content {
+            position: relative;
+            flex: 1;
+            background: transparent;
+            opacity: 1;
+            padding: 25px 30px;
+            justify-content: center;
+        }
+
+        /* 图片标题 - 响应式特效 */
+        .image-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            position: relative;
+            padding-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .image-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), #8b5cf6);
+            border-radius: 2px;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .image-item:hover .image-title::after {
+            transform: scaleX(1);
+        }
+
+        /* 图片描述 - 打字机效果 */
+        .image-description {
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.3s ease;
+            position: relative;
+        }
+
+        .image-item:hover .image-description {
+            max-height: 100px;
+            margin-bottom: 20px;
+        }
+
+        .image-grid.list-view .image-description {
+            max-height: 100px;
+            margin-bottom: 20px;
+        }
+
+        /* 打字机光标效果 */
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: var(--accent-color);
+            margin-left: 3px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            opacity: 0;
+        }
+
+        .image-item:hover .typewriter-cursor {
+            animation: blink 1s infinite 0.5s;
+            opacity: 1;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .image-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition);
+        }
+
+        .image-item:hover .image-meta {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.2s;
+        }
+
+        .image-grid.list-view .image-meta {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 标签特效 */
+        .image-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition);
+        }
+
+        .image-item:hover .image-tags {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.3s;
+        }
+
+        .image-grid.list-view .image-tags {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tag {
+            padding: 6px 14px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tag:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .image-actions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: var(--transition);
+        }
+
+        .image-item:hover .image-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .image-grid.list-view .image-actions {
+            position: static;
+            opacity: 1;
+            transform: translateY(0);
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            border-color: transparent;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .action-btn.delete-btn:hover {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        /* 详情模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            background: linear-gradient(90deg, var(--accent-color), #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .close-modal {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .close-modal:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        .modal-image-container {
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            aspect-ratio: 4/3;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slide-in-left 0.8s ease-out 0.3s forwards;
+        }
+
+        @keyframes slide-in-left {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            animation: fade-in 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes fade-in {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-info {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            opacity: 0;
+            transform: translateX(20px);
+            animation: slide-in-right 0.8s ease-out 0.3s forwards;
+        }
+
+        @keyframes slide-in-right {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .info-section {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: var(--transition);
+        }
+
+        .info-section:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+        }
+
+        .info-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-title i {
+            font-size: 1.1rem;
+        }
+
+        .info-content {
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 1.05rem;
+            position: relative;
+            padding-left: 20px;
+            border-left: 3px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .info-item:hover {
+            transform: translateX(5px);
+        }
+
+        .info-label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .info-item:hover .info-label {
+            color: var(--accent-color);
+        }
+
+        .info-value {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            animation: fade-in 1s ease-out;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: rgba(148, 163, 184, 0.3);
+            margin-bottom: 30px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .empty-title {
+            font-size: 2rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        .empty-description {
+            color: var(--text-dim);
+            max-width: 400px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(148, 163, 184, 0.3);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .header {
+                padding: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .logo-text {
+                font-size: 1.8rem;
+            }
+            
+            .upload-btn {
+                padding: 12px 25px;
+                font-size: 0.95rem;
+            }
+            
+            .gallery-section, .sidebar {
+                padding: 25px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .nav-controls {
+                justify-content: space-between;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 15px;
+            }
+            
+            .modal-header, .modal-body {
+                padding: 20px;
+            }
+            
+            .image-grid.list-view .image-thumbnail {
+                width: 40%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .image-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .upload-btn span {
+                display: none;
+            }
+            
+            .upload-btn {
+                padding: 14px;
+                width: 50px;
+                height: 50px;
+            }
+            
+            .sidebar {
+                padding: 20px;
+            }
+            
+            .gallery-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .view-controls {
+                align-self: flex-start;
+            }
+            
+            .image-grid.list-view .image-thumbnail {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .image-grid.list-view .image-item {
+                flex-direction: column;
+                aspect-ratio: auto;
+            }
+        }
+
+        /* 防止文字选择 */
+        .image-item, .view-btn, .action-btn, .upload-btn, .info-btn {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景渐变 -->
+    <div class="gradient-background">
+        <div class="gradient-layer"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="app-container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fas fa-mountain-sun"></i>
+                </div>
+                <h1 class="logo-text">视觉艺术馆</h1>
+            </div>
+            
+            <div class="nav-controls">
+                <button class="upload-btn" id="uploadBtn">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>上传图片</span>
+                </button>
+                <input type="file" id="uploadInput" class="upload-input" accept="image/*" multiple>
+                
+                <button class="info-btn" id="infoBtn" title="使用说明">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 侧边栏 -->
+            <aside class="sidebar">
+                <h2 class="sidebar-title">
+                    <i class="fas fa-filter"></i>
+                    筛选与统计
+                </h2>
+                
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索图片...">
+                </div>
+                
+                <div class="filter-section">
+                    <label class="filter-label">分类筛选</label>
+                    <select class="filter-select" id="categoryFilter">
+                        <option value="all">所有分类</option>
+                        <option value="landscape">自然风光</option>
+                        <option value="cityscape">城市建筑</option>
+                        <option value="portrait">人物肖像</option>
+                        <option value="wildlife">野生动物</option>
+                        <option value="abstract">抽象艺术</option>
+                        <option value="macro">微距摄影</option>
+                    </select>
+                </div>
+                
+                <div class="filter-section">
+                    <label class="filter-label">排序方式</label>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="newest">最新上传</option>
+                        <option value="oldest">最早上传</option>
+                        <option value="name">名称排序</option>
+                        <option value="size">文件大小</option>
+                        <option value="views">浏览次数</option>
+                    </select>
+                </div>
+                
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <span class="stat-label">图片总数</span>
+                        <span class="stat-value" id="totalImages">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">总大小</span>
+                        <span class="stat-value" id="totalSize">0 MB</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">浏览次数</span>
+                        <span class="stat-value" id="totalViews">0</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 图库区域 -->
+            <section class="gallery-section">
+                <div class="gallery-header">
+                    <h2 class="gallery-title">
+                        <i class="fas fa-camera-retro"></i>
+                        视觉艺术收藏
+                    </h2>
+                    
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 图片网格 -->
+                <div class="image-grid" id="imageGrid">
+                    <!-- 图片将通过JavaScript动态生成 -->
+                </div>
+                
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3 class="empty-title">发现美的开始</h3>
+                    <p class="empty-description">
+                        上传您的第一张图片，开始构建专属的视觉艺术收藏馆
+                    </p>
+                    <button class="upload-btn" id="emptyUploadBtn">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>开始上传</span>
+                    </button>
+                </div>
+                
+                <!-- 加载动画 -->
+                <div class="loader" id="loader">
+                    <div class="loader-spinner"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 图片详情模态框 -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">图片详情</h3>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img class="modal-image" id="modalImage" src="" alt="">
+                </div>
+                
+                <div class="modal-info">
+                    <div class="info-section">
+                        <h4 class="info-title">
+                            <i class="fas fa-align-left"></i>
+                            作品描述
+                        </h4>
+                        <p class="info-content" id="modalDescription">
+                            这里将显示图片的详细描述信息。
+                        </p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4 class="info-title">
+                            <i class="fas fa-info-circle"></i>
+                            作品信息
+                        </h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">作品名称</span>
+                                <span class="info-value" id="modalFileName">示例作品</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">文件大小</span>
+                                <span class="info-value" id="modalFileSize">2.5 MB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">创作时间</span>
+                                <span class="info-value" id="modalUploadTime">2023-10-01</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">作品尺寸</span>
+                                <span class="info-value" id="modalDimensions">1920x1080</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4 class="info-title">
+                            <i class="fas fa-tags"></i>
+                            作品标签
+                        </h4>
+                        <div class="info-grid" id="modalTags">
+                            <!-- 标签将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 图片数据管理
+        class ElegantGallery {
+            constructor() {
+                this.images = [];
+                this.filteredImages = [];
+                this.currentView = 'grid';
+                this.currentImage = null;
+                this.storageKey = 'elegantArtGallery';
+                this.totalViews = 0;
+                
+                // DOM元素
+                this.elements = {
+                    imageGrid: document.getElementById('imageGrid'),
+                    emptyState: document.getElementById('emptyState'),
+                    loader: document.getElementById('loader'),
+                    uploadBtn: document.getElementById('uploadBtn'),
+                    uploadInput: document.getElementById('uploadInput'),
+                    emptyUploadBtn: document.getElementById('emptyUploadBtn'),
+                    infoBtn: document.getElementById('infoBtn'),
+                    searchInput: document.getElementById('searchInput'),
+                    categoryFilter: document.getElementById('categoryFilter'),
+                    sortFilter: document.getElementById('sortFilter'),
+                    viewButtons: document.querySelectorAll('.view-btn'),
+                    imageModal: document.getElementById('imageModal'),
+                    closeModal: document.getElementById('closeModal'),
+                    modalImage: document.getElementById('modalImage'),
+                    modalTitle: document.getElementById('modalTitle'),
+                    modalDescription: document.getElementById('modalDescription'),
+                    modalFileName: document.getElementById('modalFileName'),
+                    modalFileSize: document.getElementById('modalFileSize'),
+                    modalUploadTime: document.getElementById('modalUploadTime'),
+                    modalDimensions: document.getElementById('modalDimensions'),
+                    modalTags: document.getElementById('modalTags'),
+                    totalImages: document.getElementById('totalImages'),
+                    totalSize: document.getElementById('totalSize'),
+                    totalViews: document.getElementById('totalViews')
+                };
+                
+                this.init();
+            }
+            
+            // 初始化
+            init() {
+                this.loadImages();
+                this.bindEvents();
+                this.updateStats();
+            }
+            
+            // 绑定事件
+            bindEvents() {
+                // 上传按钮
+                this.elements.uploadBtn.addEventListener('click', () => this.elements.uploadInput.click());
+                this.elements.emptyUploadBtn.addEventListener('click', () => this.elements.uploadInput.click());
+                this.elements.uploadInput.addEventListener('change', (e) => this.handleImageUpload(e));
+                
+                // 信息按钮
+                this.elements.infoBtn.addEventListener('click', () => {
+                    this.showInfoMessage();
+                });
+                
+                // 搜索和筛选
+                this.elements.searchInput.addEventListener('input', () => this.filterImages());
+                this.elements.categoryFilter.addEventListener('change', () => this.filterImages());
+                this.elements.sortFilter.addEventListener('change', () => this.filterImages());
+                
+                // 视图切换
+                this.elements.viewButtons.forEach(btn => {
+                    btn.addEventListener('click', () => this.switchView(btn.dataset.view));
+                });
+                
+                // 模态框
+                this.elements.closeModal.addEventListener('click', () => this.closeModal());
+                this.elements.imageModal.addEventListener('click', (e) => {
+                    if (e.target === this.elements.imageModal) {
+                        this.closeModal();
+                    }
+                });
+                
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeModal();
+                    }
+                    if (e.key === 'ArrowRight' && this.currentImage) {
+                        this.navigateImages(1);
+                    }
+                    if (e.key === 'ArrowLeft' && this.currentImage) {
+                        this.navigateImages(-1);
+                    }
+                });
+            }
+            
+            // 显示使用说明
+            showInfoMessage() {
+                const message = `
+                    <div style="padding: 20px; max-width: 500px;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 15px;">使用说明</h3>
+                        <ul style="line-height: 1.8; color: var(--text-dim);">
+                            <li><strong>上传图片：</strong>点击右上角上传按钮，支持多选</li>
+                            <li><strong>查看详情：</strong>点击任意图片查看详细信息</li>
+                            <li><strong>图片筛选：</strong>使用左侧边栏进行搜索和分类</li>
+                            <li><strong>视图切换：</strong>网格视图和列表视图自由切换</li>
+                            <li><strong>键盘操作：</strong>左右箭头切换图片，ESC关闭详情</li>
+                            <li><strong>响应特效：</strong>悬停图片查看文字特效和动画</li>
+                        </ul>
+                        <div style="margin-top: 20px; color: var(--accent-color);">
+                            <i class="fas fa-lightbulb"></i> 提示：所有数据自动保存到本地
+                        </div>
+                    </div>
+                `;
+                
+                // 创建自定义提示框
+                const infoModal = document.createElement('div');
+                infoModal.className = 'modal-overlay';
+                infoModal.innerHTML = `
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h3 class="modal-title">使用指南</h3>
+                            <button class="close-modal" id="closeInfoModal">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            ${message}
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(infoModal);
+                infoModal.classList.add('active');
+                
+                // 绑定关闭事件
+                const closeBtn = infoModal.querySelector('#closeInfoModal');
+                closeBtn.addEventListener('click', () => {
+                    infoModal.classList.remove('active');
+                    setTimeout(() => infoModal.remove(), 300);
+                });
+                
+                infoModal.addEventListener('click', (e) => {
+                    if (e.target === infoModal) {
+                        infoModal.classList.remove('active');
+                        setTimeout(() => infoModal.remove(), 300);
+                    }
+                });
+            }
+            
+            // 加载图片
+            loadImages() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        this.images = data.images || [];
+                        this.filteredImages = [...this.images];
+                        this.totalViews = data.totalViews || 0;
+                        this.renderGallery();
+                    } catch (e) {
+                        console.error('加载图片数据失败:', e);
+                        this.images = [];
+                        this.filteredImages = [];
+                    }
+                } else {
+                    // 初始示例图片
+                    this.images = this.getSampleImages();
+                    this.filteredImages = [...this.images];
+                    this.renderGallery();
+                }
+                
+                this.elements.loader.style.display = 'none';
+            }
+            
+            // 获取示例图片
+            getSampleImages() {
+                return [
+                    {
+                        id: '1',
+                        name: '阿尔卑斯晨曦',
+                        description: '瑞士阿尔卑斯山脉清晨的第一缕阳光，金色的光线洒在雪山之巅，云雾在山谷间缓缓流动，宛如仙境般的壮丽景色。',
+                        detailedDescription: '拍摄于瑞士阿尔卑斯山脉的清晨时分。当第一缕阳光突破地平线，金色的光芒瞬间照亮了白雪覆盖的山峰。山间的云雾如同柔和的丝绸，缓缓流淌在山谷之间。远处的针叶林在晨光中呈现出深邃的墨绿色，与洁白的雪峰形成鲜明对比。这种景象一年中只有少数几个清晨能够看到，需要完美的天气条件和精确的拍摄时机。',
+                        category: 'landscape',
+                        tags: ['雪山', '日出', '云雾', '自然', '瑞士'],
+                        uploadTime: '2023-10-01',
+                        fileSize: '3.2 MB',
+                        dimensions: '3840x2160',
+                        views: 128,
+                        url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '2',
+                        name: '马尔代夫翡翠海',
+                        description: '马尔代夫群岛的翡翠色海水清澈见底，白色的珊瑚沙滩在阳光下闪闪发光，构成一幅完美的热带天堂画卷。',
+                        detailedDescription: '马尔代夫阿瑞岛的海滩景观。这里的海水因其独特的矿物成分和浅海环境呈现出令人惊叹的翡翠绿色。水下珊瑚礁生态系统丰富多样，为无数海洋生物提供了栖息地。沙滩由珊瑚碎片自然形成，在阳光下呈现纯白色。退潮时，沙滩上会留下精致的波纹图案，这是潮汐和风向共同作用的艺术创作。',
+                        category: 'landscape',
+                        tags: ['海岛', '海洋', '沙滩', '热带', '度假'],
+                        uploadTime: '2023-10-02',
+                        fileSize: '4.1 MB',
+                        dimensions: '5120x2880',
+                        views: 94,
+                        url: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '3',
+                        name: '挪威森林秘境',
+                        description: '挪威原始森林中的神秘小径，阳光穿过茂密的树冠洒下斑驳光影，厚厚的苔藓覆盖着岩石和树干。',
+                        detailedDescription: '挪威特隆赫姆附近的古老森林。这里的树木平均树龄超过200年，形成了独特的原始森林生态系统。地面覆盖着厚达30厘米的苔藓层，踩上去柔软如地毯。清晨的雾气在林间萦绕，阳光穿过云杉和松树的缝隙，形成丁达尔效应。森林中隐藏着许多小湖泊，湖水因含有矿物质而呈现深蓝色。这里是许多珍稀动植物的家园。',
+                        category: 'landscape',
+                        tags: ['森林', '北欧', '自然', '徒步', '苔藓'],
+                        uploadTime: '2023-10-03',
+                        fileSize: '3.8 MB',
+                        dimensions: '4096x2304',
+                        views: 76,
+                        url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '4',
+                        name: '圣托里尼日落',
+                        description: '希腊圣托里尼岛标志性的蓝白建筑群在金色落日余晖中格外迷人，爱琴海的深蓝色海水作为背景。',
+                        detailedDescription: '圣托里尼岛伊亚镇的日落时分。这里的建筑采用传统的基克拉泽斯风格，纯白色的墙壁和蓝色的圆顶教堂形成鲜明对比。日落时分，太阳缓缓沉入爱琴海，天空从金色渐变为橙红色，再变为深紫色。建筑在夕阳的照射下呈现出温暖的色调，与深蓝色的海水形成完美的色彩搭配。这个角度需要提前数小时占位才能拍摄到。',
+                        category: 'cityscape',
+                        tags: ['日落', '海岛', '希腊', '建筑', '爱琴海'],
+                        uploadTime: '2023-10-04',
+                        fileSize: '4.5 MB',
+                        dimensions: '5760x3240',
+                        views: 112,
+                        url: 'https://images.unsplash.com/photo-1531326044450-044182b3d490?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '5',
+                        name: '张家界奇峰',
+                        description: '中国张家界国家森林公园的石英砂岩峰林在云雾中若隐若现，宛如中国传统水墨画中的仙境景象。',
+                        detailedDescription: '张家界袁家界的石英砂岩峰林景观。这些石柱形成于3.8亿年前，经过长期的地质作用和风化侵蚀，形成了如今独特的柱状景观。清晨的云雾在山谷间流动，使得峰林时隐时现，营造出梦幻般的氛围。植被在石柱顶端顽强生长，形成了独特的"空中花园"生态系统。这里是电影《阿凡达》中悬浮山的灵感来源。',
+                        category: 'landscape',
+                        tags: ['山峰', '云雾', '中国', '自然奇观', '地质'],
+                        uploadTime: '2023-10-05',
+                        fileSize: '4.2 MB',
+                        dimensions: '4608x2592',
+                        views: 88,
+                        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    },
+                    {
+                        id: '6',
+                        name: '大堡礁海底世界',
+                        description: '澳大利亚大堡礁水下五彩斑斓的珊瑚花园，各种热带鱼群在珊瑚丛中穿梭，展现海洋生物多样性。',
+                        detailedDescription: '大堡礁心形礁附近的水下景观。这里拥有世界上最大的珊瑚礁系统，覆盖面积超过34万平方公里。图片展示的是鹿角珊瑚和脑珊瑚组成的珊瑚花园，其间游弋着小丑鱼、蝴蝶鱼和鹦鹉鱼等热带鱼类。阳光穿透清澈的海水，在珊瑚上投下斑驳的光影。珊瑚的颜色来自于与之共生的虫黄藻，不同种类的珊瑚呈现出不同的色彩。',
+                        category: 'wildlife',
+                        tags: ['海洋', '珊瑚', '澳大利亚', '潜水', '生物多样性'],
+                        uploadTime: '2023-10-06',
+                        fileSize: '5.1 MB',
+                        dimensions: '6000x3375',
+                        views: 65,
+                        url: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+                    }
+                ];
+            }
+            
+            // 处理图片上传
+            async handleImageUpload(event) {
+                const files = event.target.files;
+                if (!files || files.length === 0) return;
+                
+                // 显示加载状态
+                this.elements.loader.style.display = 'flex';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    if (!file.type.startsWith('image/')) {
+                        alert(`文件 "${file.name}" 不是图片文件，已跳过。`);
+                        continue;
+                    }
+                    
+                    if (file.size > 15 * 1024 * 1024) {
+                        alert(`文件 "${file.name}" 超过15MB大小限制，已跳过。`);
+                        continue;
+                    }
+                    
+                    const imageData = await this.createImageData(file);
+                    this.images.unshift(imageData);
+                }
+                
+                event.target.value = '';
+                
+                this.filteredImages = [...this.images];
+                this.renderGallery();
+                this.saveToStorage();
+                this.updateStats();
+                
+                this.elements.loader.style.display = 'none';
+            }
+            
+            // 创建图片数据
+            createImageData(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        
+                        img.onload = () => {
+                            const now = new Date();
+                            const imageData = {
+                                id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                                name: file.name.replace(/\.[^/.]+$/, ""),
+                                description: `上传于 ${now.toLocaleDateString('zh-CN')} 的图片作品`,
+                                detailedDescription: `这是一张上传于 ${now.toLocaleDateString('zh-CN')} 的图片。文件名为 ${file.name}，原始尺寸为 ${img.naturalWidth} x ${img.naturalHeight} 像素。`,
+                                category: 'landscape',
+                                tags: ['上传作品', '个人收藏'],
+                                uploadTime: now.toISOString().split('T')[0],
+                                fileSize: this.formatFileSize(file.size),
+                                dimensions: `${img.naturalWidth}x${img.naturalHeight}`,
+                                views: 0,
+                                url: e.target.result,
+                                file: file
+                            };
+                            
+                            resolve(imageData);
+                        };
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // 格式化文件大小
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // 筛选图片
+            filterImages() {
+                const searchTerm = this.elements.searchInput.value.toLowerCase();
+                const category = this.elements.categoryFilter.value;
+                const sortBy = this.elements.sortFilter.value;
+                
+                let filtered = this.images.filter(image => {
+                    const matchesSearch = searchTerm === '' || 
+                        image.name.toLowerCase().includes(searchTerm) || 
+                        image.description.toLowerCase().includes(searchTerm) ||
+                        image.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                    
+                    const matchesCategory = category === 'all' || image.category === category;
+                    
+                    return matchesSearch && matchesCategory;
+                });
+                
+                filtered = this.sortImages(filtered, sortBy);
+                
+                this.filteredImages = filtered;
+                this.renderGallery();
+            }
+            
+            // 排序图片
+            sortImages(images, sortBy) {
+                switch (sortBy) {
+                    case 'newest':
+                        return images.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+                    case 'oldest':
+                        return images.sort((a, b) => new Date(a.uploadTime) - new Date(b.uploadTime));
+                    case 'name':
+                        return images.sort((a, b) => a.name.localeCompare(b.name));
+                    case 'size':
+                        return images.sort((a, b) => {
+                            const sizeA = this.parseFileSize(a.fileSize);
+                            const sizeB = this.parseFileSize(b.fileSize);
+                            return sizeB - sizeA;
+                        });
+                    case 'views':
+                        return images.sort((a, b) => b.views - a.views);
+                    default:
+                        return images;
+                }
+            }
+            
+            // 解析文件大小
+            parseFileSize(sizeString) {
+                const match = sizeString.match(/^([\d.]+)\s*(\w+)$/);
+                if (!match) return 0;
+                
+                const value = parseFloat(match[1]);
+                const unit = match[2].toUpperCase();
+                
+                const units = {
+                    'BYTES': 1,
+                    'KB': 1024,
+                    'MB': 1024 * 1024,
+                    'GB': 1024 * 1024 * 1024
+                };
+                
+                return value * (units[unit] || 1);
+            }
+            
+            // 切换视图
+            switchView(view) {
+                if (view === this.currentView) return;
+                
+                this.currentView = view;
+                this.elements.imageGrid.classList.toggle('list-view', view === 'list');
+                
+                this.elements.viewButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                
+                this.renderGallery();
+            }
+            
+            // 渲染图库
+            renderGallery() {
+                if (this.filteredImages.length === 0) {
+                    this.elements.imageGrid.innerHTML = '';
+                    this.elements.emptyState.style.display = 'block';
+                    return;
+                }
+                
+                this.elements.emptyState.style.display = 'none';
+                
+                const fragment = document.createDocumentFragment();
+                
+                this.filteredImages.forEach((image, index) => {
+                    const imageItem = this.createImageElement(image, index);
+                    fragment.appendChild(imageItem);
+                });
+                
+                this.elements.imageGrid.innerHTML = '';
+                this.elements.imageGrid.appendChild(fragment);
+            }
+            
+            // 创建图片元素
+            createImageElement(image, index) {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                item.dataset.id = image.id;
+                item.style.animationDelay = `${index * 0.1}s`;
+                
+                const img = document.createElement('img');
+                img.className = 'image-thumbnail';
+                img.src = image.url;
+                img.alt = image.name;
+                img.loading = 'lazy';
+                img.style.animationDelay = `${index * 0.1 + 0.6}s`;
+                
+                const content = document.createElement('div');
+                content.className = 'image-content';
+                
+                const title = document.createElement('h4');
+                title.className = 'image-title';
+                title.textContent = image.name;
+                
+                const description = document.createElement('p');
+                description.className = 'image-description';
+                description.textContent = image.description;
+                
+                // 添加打字机光标
+                const cursor = document.createElement('span');
+                cursor.className = 'typewriter-cursor';
+                description.appendChild(cursor);
+                
+                const meta = document.createElement('div');
+                meta.className = 'image-meta';
+                meta.innerHTML = `
+                    <span><i class="far fa-calendar"></i> ${image.uploadTime}</span>
+                    <span><i class="fas fa-eye"></i> ${image.views}次</span>
+                    <span><i class="fas fa-file-alt"></i> ${image.fileSize}</span>
+                `;
+                
+                const tags = document.createElement('div');
+                tags.className = 'image-tags';
+                image.tags.slice(0, 3).forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'tag';
+                    tagElement.textContent = tag;
+                    tags.appendChild(tagElement);
+                });
+                
+                const actions = document.createElement('div');
+                actions.className = 'image-actions';
+                actions.innerHTML = `
+                    <button class="action-btn view-btn" data-action="view" title="查看详情">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="action-btn download-btn" data-action="download" title="下载图片">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="action-btn delete-btn" data-action="delete" title="删除图片">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                content.appendChild(title);
+                content.appendChild(description);
+                content.appendChild(meta);
+                content.appendChild(tags);
+                content.appendChild(actions);
+                
+                item.appendChild(img);
+                item.appendChild(content);
+                
+                // 绑定事件
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.image-actions')) {
+                        this.openImageDetail(image);
+                    }
+                });
+                
+                actions.querySelector('.view-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openImageDetail(image);
+                });
+                
+                actions.querySelector('.download-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.downloadImage(image);
+                });
+                
+                actions.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deleteImage(image.id);
+                });
+                
+                return item;
+            }
+            
+            // 打开图片详情
+            openImageDetail(image) {
+                this.currentImage = image;
+                image.views = (image.views || 0) + 1;
+                this.totalViews++;
+                this.updateStats();
+                this.saveToStorage();
+                
+                // 更新模态框内容
+                this.elements.modalImage.src = image.url;
+                this.elements.modalImage.alt = image.name;
+                this.elements.modalTitle.textContent = image.name;
+                this.elements.modalDescription.textContent = image.detailedDescription;
+                this.elements.modalFileName.textContent = image.name;
+                this.elements.modalFileSize.textContent = image.fileSize;
+                this.elements.modalUploadTime.textContent = image.uploadTime;
+                this.elements.modalDimensions.textContent = image.dimensions;
+                
+                // 更新标签
+                this.elements.modalTags.innerHTML = '';
+                image.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'info-value';
+                    tagElement.style.background = 'rgba(59, 130, 246, 0.1)';
+                    tagElement.style.padding = '8px 15px';
+                    tagElement.style.borderRadius = '20px';
+                    tagElement.style.border = '1px solid rgba(59, 130, 246, 0.2)';
+                    tagElement.textContent = tag;
+                    this.elements.modalTags.appendChild(tagElement);
+                });
+                
+                // 显示模态框
+                this.elements.imageModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // 导航图片
+            navigateImages(direction) {
+                const currentIndex = this.filteredImages.findIndex(img => img.id === this.currentImage.id);
+                if (currentIndex === -1) return;
+                
+                let newIndex = currentIndex + direction;
+                if (newIndex < 0) newIndex = this.filteredImages.length - 1;
+                if (newIndex >= this.filteredImages.length) newIndex = 0;
+                
+                this.openImageDetail(this.filteredImages[newIndex]);
+            }
+            
+            // 关闭模态框
+            closeModal() {
+                this.elements.imageModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // 下载图片
+            downloadImage(image) {
+                const link = document.createElement('a');
+                link.href = image.url;
+                link.download = image.name + '.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // 删除图片
+            deleteImage(imageId) {
+                if (!confirm('确定要删除这张图片吗？此操作不可撤销。')) return;
+                
+                this.images = this.images.filter(img => img.id !== imageId);
+                this.filteredImages = this.filteredImages.filter(img => img.id !== imageId);
+                
+                this.renderGallery();
+                this.saveToStorage();
+                this.updateStats();
+                
+                if (this.currentImage && this.currentImage.id === imageId) {
+                    this.closeModal();
+                }
+            }
+            
+            // 保存到本地存储
+            saveToStorage() {
+                const data = {
+                    images: this.images.map(img => {
+                        const { file, ...rest } = img;
+                        return rest;
+                    }),
+                    totalViews: this.totalViews,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(data));
+                } catch (e) {
+                    console.error('保存数据失败:', e);
+                }
+            }
+            
+            // 更新统计信息
+            updateStats() {
+                this.elements.totalImages.textContent = this.images.length;
+                
+                let totalSize = 0;
+                this.images.forEach(img => {
+                    totalSize += this.parseFileSize(img.fileSize);
+                });
+                
+                this.elements.totalSize.textContent = this.formatFileSize(totalSize);
+                this.elements.totalViews.textContent = this.totalViews;
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            const gallery = new ElegantGallery();
+            window.gallery = gallery;
+        });
+    </script>
+</body>
+</html>
